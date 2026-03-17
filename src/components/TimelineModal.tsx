@@ -6,6 +6,7 @@ import { AnHanhChinh, TienDoEntry } from '@/lib/types'
 import { X, Plus, Calendar, Clock, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from './Toast'
+import DateInput from './DateInput'
 
 interface Props {
     open: boolean
@@ -96,11 +97,10 @@ export default function TimelineModal({ open, record, onClose, onSuccess }: Prop
                             <div className="flex gap-3">
                                 <div className="w-[160px] shrink-0">
                                     <label className="block text-xs font-medium text-slate-600 mb-1">Ngày</label>
-                                    <input
-                                        type="date"
+                                    <DateInput
                                         value={newDate}
-                                        onChange={e => setNewDate(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                        onChange={setNewDate}
+                                        className="rounded-lg focus:ring-blue-300"
                                     />
                                 </div>
                                 <div className="flex-1">

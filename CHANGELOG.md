@@ -26,3 +26,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Color palette chuyển từ slate/dark theme cơ bản (của template VBPL) sang tone màu đỏ đậm (Crimson/Maroon) cho Header và Footer theo yêu cầu mỹ thuật mới.
+- Cập nhật giao diện component `TimelineModal` (Cập nhật Tiến độ), thay thế thẻ `<input type="date">` mặc định của HTML bằng component `<DateInput />` tuỳ chỉnh với lịch Dropdown sang trọng tiếng Việt và định dạng chuẩn `dd/mm/yyyy`.
