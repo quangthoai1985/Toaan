@@ -23,6 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Component `TimelineModal` cập nhật thêm các bước tiến độ vào biểu đồ Timeline của Án.
   - Component `CompleteAnModal` để chốt Án thành công, điền báo cáo "Kết quả cuối cùng" và chuyển status sang `COMPLETED`.
   - Component `ConfirmModal` hoạt động như tính năng "Hoàn tác" (Undo) chuyển Án từ "ÁN XONG" quay lại "ĐANG THI HÀNH".
+- **Chức năng Import Excel:**
+  - Component `ImportExcelModal` tự động đọc dữ liệu từ file `.xlsx`, tự động nhận dạng Sheet và mapping cột tương ứng giữa hai định dạng "Đang thi hành" và "Án Xong".
+  - Thuật toán bóc tách lịch sử thi hành án linh hoạt (dựa theo Regex Ngày/Tháng/Năm) thành mảng Timeline tiêu chuẩn.
+- **Tính năng mở rộng:**
+  - Bổ sung Cột "Quyết định buộc thi hành án" vào hệ thống Component và Database Supabase.
+  - Chức năng Inline-Editing (Chỉnh sửa Trực tiếp) kèm biểu tượng Pencil (Cây bút) trên Component `DetailModal` đối với Tab hiển thị "Án Xong". Hỗ trợ Textarea nhập liệu Lịch sử với Auto-Parse.
 
 ### Changed
 - Color palette chuyển từ slate/dark theme cơ bản (của template VBPL) sang tone màu đỏ đậm (Crimson/Maroon) cho Header và Footer theo yêu cầu mỹ thuật mới.

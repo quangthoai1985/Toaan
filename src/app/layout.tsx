@@ -1,8 +1,19 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Be_Vietnam_Pro } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin', 'vietnamese'] })
+const inter = Inter({ 
+  subsets: ['latin', 'vietnamese'],
+  display: 'swap',
+  variable: '--font-inter',
+})
+
+const beVietnamPro = Be_Vietnam_Pro({ 
+  subsets: ['latin', 'vietnamese'], 
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+  variable: '--font-be-vietnam-pro',
+})
 
 export const metadata: Metadata = {
   title: 'Quản Lý Án Hành Chính | Sở Tư pháp Tỉnh An Giang',
@@ -17,8 +28,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+    <html lang="vi" className={`${beVietnamPro.variable} ${inter.variable}`} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         {children}
       </body>
     </html>

@@ -4,6 +4,7 @@ export interface AnHanhChinh {
     nguoi_khoi_kien: string
     nguoi_phai_thi_hanh: string
     nghia_vu_thi_hanh: string | null
+    quyet_dinh_buoc_thi_hanh: string | null
     status: 'PENDING' | 'COMPLETED'
     ket_qua_cuoi_cung: string | null
     tien_do_cap_nhat: TienDoEntry[]

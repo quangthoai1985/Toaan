@@ -20,6 +20,7 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
         nguoi_khoi_kien: '',
         nguoi_phai_thi_hanh: '',
         nghia_vu_thi_hanh: '',
+        quyet_dinh_buoc_thi_hanh: '',
     })
 
     function updateField(field: string, value: string) {
@@ -27,7 +28,7 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
     }
 
     function resetForm() {
-        setForm({ so_ban_an: '', nguoi_khoi_kien: '', nguoi_phai_thi_hanh: '', nghia_vu_thi_hanh: '' })
+        setForm({ so_ban_an: '', nguoi_khoi_kien: '', nguoi_phai_thi_hanh: '', nghia_vu_thi_hanh: '', quyet_dinh_buoc_thi_hanh: '' })
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -43,6 +44,7 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
             nguoi_khoi_kien: form.nguoi_khoi_kien.trim(),
             nguoi_phai_thi_hanh: form.nguoi_phai_thi_hanh.trim(),
             nghia_vu_thi_hanh: form.nghia_vu_thi_hanh.trim() || null,
+            quyet_dinh_buoc_thi_hanh: form.quyet_dinh_buoc_thi_hanh.trim() || null,
             status: 'PENDING',
             tien_do_cap_nhat: [],
         })
@@ -108,8 +110,21 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
                         <textarea
                             value={form.nghia_vu_thi_hanh}
                             onChange={e => updateField('nghia_vu_thi_hanh', e.target.value)}
-                            placeholder="Nội dung quyết định buộc thi hành..."
+                            placeholder="Nội dung nghĩa vụ thi hành..."
                             rows={3}
+                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-300 resize-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Quyết định buộc thi hành án
+                        </label>
+                        <textarea
+                            value={form.quyet_dinh_buoc_thi_hanh}
+                            onChange={e => updateField('quyet_dinh_buoc_thi_hanh', e.target.value)}
+                            placeholder="Số, ngày tháng QĐ buộc THA (nếu có)..."
+                            rows={2}
                             className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-300 resize-none"
                         />
                     </div>
