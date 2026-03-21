@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { AnHanhChinh, TienDoEntry } from '@/lib/types'
 import { cn, truncate } from '@/lib/utils'
-import { Search, Plus, Pencil, Eye, CheckCircle2, Undo2, RefreshCw, Loader2, Trash2, UploadCloud } from 'lucide-react'
+import { Search, Plus, Pencil, Eye, CheckCircle2, Undo2, RefreshCw, Loader2, Trash2, UploadCloud, ArrowRightCircle, Clock, PauseCircle } from 'lucide-react'
 import { useToast } from './Toast'
 import AddAnModal from './AddAnModal'
 import CompleteAnModal from './CompleteAnModal'
@@ -13,7 +13,17 @@ import TimelineModal from './TimelineModal'
 import ConfirmModal from './ConfirmModal'
 import ImportExcelModal from './ImportExcelModal'
 
-type TabKey = 'PENDING' | 'COMPLETED'
+type TabKey = 'PENDING' | 'WATCHING' | 'COMPLETED'
+
+interface StatusAction {
+    targetStatus: TabKey
+    label: string
+    icon: React.ReactNode
+    className: string
+    confirmTitle: string
+    confirmMessage: (soBanAn: string) => string
+    successMessage: string
+}
 
 export default function AnHanhChinhPage() {
     const supabase = createClient()
@@ -23,6 +33,7 @@ export default function AnHanhChinhPage() {
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
     const [pendingCount, setPendingCount] = useState(0)
+    const [watchingCount, setWatchingCount] = useState(0)
     const [completedCount, setCompletedCount] = useState(0)
 
     const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -35,8 +46,11 @@ export default function AnHanhChinhPage() {
     const [completeRecord, setCompleteRecord] = useState<AnHanhChinh | null>(null)
     const [detailRecord, setDetailRecord] = useState<AnHanhChinh | null>(null)
     const [timelineRecord, setTimelineRecord] = useState<AnHanhChinh | null>(null)
-    const [undoRecord, setUndoRecord] = useState<AnHanhChinh | null>(null)
-    const [undoLoading, setUndoLoading] = useState(false)
+
+    // Status change confirmation
+    const [statusChangeRecord, setStatusChangeRecord] = useState<AnHanhChinh | null>(null)
+    const [statusChangeTarget, setStatusChangeTarget] = useState<StatusAction | null>(null)
+    const [statusChangeLoading, setStatusChangeLoading] = useState(false)
 
     // Fetch data
     const fetchData = useCallback(async () => {
@@ -59,12 +73,14 @@ export default function AnHanhChinhPage() {
             setSelectedIds([])
         }
 
-        // Fetch counts for tabs
-        const [pendingRes, completedRes] = await Promise.all([
+        // Fetch counts for all tabs
+        const [pendingRes, watchingRes, completedRes] = await Promise.all([
             supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'PENDING'),
+            supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'WATCHING'),
             supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED'),
         ])
         setPendingCount(pendingRes.count ?? 0)
+        setWatchingCount(watchingRes.count ?? 0)
         setCompletedCount(completedRes.count ?? 0)
 
         setLoading(false)
@@ -86,25 +102,34 @@ export default function AnHanhChinhPage() {
         fetchData()
     }, [timelineRecord, fetchData])
 
-    async function handleUndo() {
-        if (!undoRecord) return
-        setUndoLoading(true)
+    // Generic status change handler
+    async function handleStatusChange() {
+        if (!statusChangeRecord || !statusChangeTarget) return
+        setStatusChangeLoading(true)
+
+        const payload: Record<string, unknown> = {
+            status: statusChangeTarget.targetStatus,
+        }
+
         const { error } = await supabase
             .from('an_hanh_chinh')
-            .update({
-                status: 'PENDING',
-                ket_qua_cuoi_cung: null,
-            })
-            .eq('id', undoRecord.id)
+            .update(payload)
+            .eq('id', statusChangeRecord.id)
 
-        setUndoLoading(false)
+        setStatusChangeLoading(false)
         if (error) {
             toast.error(`Lỗi: ${error.message}`)
             return
         }
-        toast.success('Đã hoàn tác — Án chuyển về "Đang thi hành"')
-        setUndoRecord(null)
+        toast.success(statusChangeTarget.successMessage)
+        setStatusChangeRecord(null)
+        setStatusChangeTarget(null)
         fetchData()
+    }
+
+    function openStatusChange(record: AnHanhChinh, action: StatusAction) {
+        setStatusChangeRecord(record)
+        setStatusChangeTarget(action)
     }
 
     async function handleBulkDelete() {
@@ -141,6 +166,75 @@ export default function AnHanhChinhPage() {
         return last.date
     }
 
+    // Status transition actions per tab
+    function getStatusActions(currentTab: TabKey): StatusAction[] {
+        switch (currentTab) {
+            case 'PENDING':
+                return [
+                    {
+                        targetStatus: 'WATCHING',
+                        label: 'Chờ theo dõi',
+                        icon: <PauseCircle className="w-3.5 h-3.5" />,
+                        className: 'text-blue-700 bg-blue-50/80 hover:bg-blue-100 ring-1 ring-blue-500/20',
+                        confirmTitle: 'Chuyển sang Chờ theo dõi',
+                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" sang trạng thái "Chờ theo dõi"?`,
+                        successMessage: 'Đã chuyển sang "Chờ theo dõi"',
+                    },
+                    {
+                        targetStatus: 'COMPLETED',
+                        label: 'Án xong',
+                        icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+                        className: 'text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100 ring-1 ring-emerald-500/20',
+                        confirmTitle: 'Chuyển sang Án xong',
+                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" sang trạng thái "Án xong"?`,
+                        successMessage: 'Đã chuyển sang "Án xong"',
+                    },
+                ]
+            case 'WATCHING':
+                return [
+                    {
+                        targetStatus: 'PENDING',
+                        label: 'Đang thi hành',
+                        icon: <Clock className="w-3.5 h-3.5" />,
+                        className: 'text-amber-700 bg-amber-50/80 hover:bg-amber-100 ring-1 ring-amber-500/20',
+                        confirmTitle: 'Chuyển về Đang thi hành',
+                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" về trạng thái "Đang thi hành"?`,
+                        successMessage: 'Đã chuyển về "Đang thi hành"',
+                    },
+                    {
+                        targetStatus: 'COMPLETED',
+                        label: 'Án xong',
+                        icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+                        className: 'text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100 ring-1 ring-emerald-500/20',
+                        confirmTitle: 'Chuyển sang Án xong',
+                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" sang trạng thái "Án xong"?`,
+                        successMessage: 'Đã chuyển sang "Án xong"',
+                    },
+                ]
+            case 'COMPLETED':
+                return [
+                    {
+                        targetStatus: 'PENDING',
+                        label: 'Đang thi hành',
+                        icon: <Clock className="w-3.5 h-3.5" />,
+                        className: 'text-amber-700 bg-amber-50/80 hover:bg-amber-100 ring-1 ring-amber-500/20',
+                        confirmTitle: 'Chuyển về Đang thi hành',
+                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" về trạng thái "Đang thi hành"?`,
+                        successMessage: 'Đã chuyển về "Đang thi hành"',
+                    },
+                    {
+                        targetStatus: 'WATCHING',
+                        label: 'Chờ theo dõi',
+                        icon: <PauseCircle className="w-3.5 h-3.5" />,
+                        className: 'text-blue-700 bg-blue-50/80 hover:bg-blue-100 ring-1 ring-blue-500/20',
+                        confirmTitle: 'Chuyển sang Chờ theo dõi',
+                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" sang trạng thái "Chờ theo dõi"?`,
+                        successMessage: 'Đã chuyển sang "Chờ theo dõi"',
+                    },
+                ]
+        }
+    }
+
     const tabs: { key: TabKey; label: string; count: number; badgeActive: string; badgeInactive: string; indicator: string }[] = [
         {
             key: 'PENDING',
@@ -151,6 +245,14 @@ export default function AnHanhChinhPage() {
             indicator: 'bg-amber-500'
         },
         {
+            key: 'WATCHING',
+            label: 'CHỜ THEO DÕI',
+            count: watchingCount,
+            badgeActive: 'bg-blue-100/80 text-blue-700 ring-1 ring-blue-500/30',
+            badgeInactive: 'bg-slate-100 text-slate-500 ring-1 ring-slate-200',
+            indicator: 'bg-blue-500'
+        },
+        {
             key: 'COMPLETED',
             label: 'ÁN XONG',
             count: completedCount,
@@ -159,6 +261,8 @@ export default function AnHanhChinhPage() {
             indicator: 'bg-emerald-500'
         },
     ]
+
+    const statusActions = getStatusActions(activeTab)
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 flex flex-col flex-1 min-h-0 w-full h-full gap-5 mx-auto w-full">
@@ -273,25 +377,13 @@ export default function AnHanhChinhPage() {
                                     />
                                 </th>
                                 <th className="px-5 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-widest w-[60px] whitespace-nowrap">STT</th>
-                                {activeTab === 'PENDING' ? (
-                                    <>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">Người khởi kiện</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[140px]">Số Bản án</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">Người phải thi hành</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[280px]">Cập nhật mới nhất</th>
-                                        <th className="px-5 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">Hành động</th>
-                                    </>
-                                ) : (
-                                    <>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[140px]">Số Bản án</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">Người phải Thi hành án</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">Nội dung (Nghĩa vụ)</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">QĐ Buộc THAHC</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[240px]">Kết quả thi hành</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">Người được THA</th>
-                                        <th className="px-5 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[140px]">Hành động</th>
-                                    </>
-                                )}
+                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">Người khởi kiện</th>
+                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">Số Bản án (Quyết Định phải Thi hành án)</th>
+                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">Người phải thi hành</th>
+                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">Nghĩa vụ phải Thi hành án</th>
+                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">QĐ buộc Thi hành án</th>
+                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[240px]">Quá trình Thi hành án</th>
+                                <th className="px-5 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[220px]">Hành động</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -313,79 +405,58 @@ export default function AnHanhChinhPage() {
                                         />
                                     </td>
                                     <td className="px-5 py-3.5 text-slate-400 text-center font-mono text-xs font-medium">{idx + 1}</td>
-                                    {activeTab === 'PENDING' ? (
-                                        <>
-                                            <td className="px-5 py-3.5 text-slate-800 font-semibold">{row.nguoi_khoi_kien}</td>
-                                            <td className="px-5 py-3.5 text-slate-600 font-medium">
-                                                <span className="inline-flex py-1 px-2.5 rounded-md bg-slate-100/80 text-slate-700 text-xs font-mono ring-1 ring-slate-200/60">
-                                                    {row.so_ban_an}
+                                    <td className="px-5 py-3.5 text-slate-800 font-semibold">{row.nguoi_khoi_kien}</td>
+                                    <td className="px-5 py-3.5 text-slate-600 font-medium">
+                                        <span className="inline-flex py-1 px-2.5 rounded-md bg-slate-100/80 text-slate-700 text-xs font-mono ring-1 ring-slate-200/60">
+                                            {row.so_ban_an}
+                                        </span>
+                                    </td>
+                                    <td className="px-5 py-3.5 text-slate-600">{row.nguoi_phai_thi_hanh}</td>
+                                    <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug">
+                                        {row.nghia_vu_thi_hanh ? truncate(row.nghia_vu_thi_hanh, 60) : '—'}
+                                    </td>
+                                    <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug">
+                                        {row.quyet_dinh_buoc_thi_hanh ? truncate(row.quyet_dinh_buoc_thi_hanh, 60) : '—'}
+                                    </td>
+                                    <td className="px-5 py-3.5">
+                                        <div className="flex flex-col gap-1">
+                                            <p className="text-slate-700 text-[13px] leading-snug">{truncate(getLatestUpdate(row.tien_do_cap_nhat), 65)}</p>
+                                            {getLatestDate(row.tien_do_cap_nhat) && (
+                                                <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
+                                                    {getLatestDate(row.tien_do_cap_nhat)}
                                                 </span>
-                                            </td>
-                                            <td className="px-5 py-3.5 text-slate-600">{row.nguoi_phai_thi_hanh}</td>
-                                            <td className="px-5 py-3.5">
-                                                <div className="flex flex-col gap-1">
-                                                    <p className="text-slate-700 text-[13px] leading-snug">{truncate(getLatestUpdate(row.tien_do_cap_nhat), 65)}</p>
-                                                    {getLatestDate(row.tien_do_cap_nhat) && (
-                                                        <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
-                                                            {getLatestDate(row.tien_do_cap_nhat)}
-                                                        </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-5 py-3.5" onClick={e => e.stopPropagation()}>
+                                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                                            {/* Update timeline button */}
+                                            <button
+                                                onClick={() => setTimelineRecord(row)}
+                                                title="Cập nhật tiến độ"
+                                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-600 bg-slate-50/80 hover:bg-slate-100 transition-colors ring-1 ring-slate-200/60 text-xs font-semibold shadow-sm"
+                                            >
+                                                <Pencil className="w-3 h-3" />
+                                                Cập nhật
+                                            </button>
+                                            {/* Status transition buttons */}
+                                            {statusActions.map(action => (
+                                                <button
+                                                    key={action.targetStatus}
+                                                    onClick={() => openStatusChange(row, action)}
+                                                    title={action.label}
+                                                    className={cn(
+                                                        'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors',
+                                                        action.className
                                                     )}
-                                                </div>
-                                            </td>
-                                            <td className="px-5 py-3.5">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setTimelineRecord(row); }}
-                                                        title="Cập nhật tiến độ"
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-blue-700 bg-blue-50/80 hover:bg-blue-100 transition-colors ring-1 ring-blue-500/20 text-xs font-semibold shadow-sm"
-                                                    >
-                                                        <Pencil className="w-3.5 h-3.5" />
-                                                        Cập nhật
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setCompleteRecord(row); }}
-                                                        title="Chốt án"
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100 transition-colors ring-1 ring-emerald-500/20 text-xs font-semibold shadow-sm"
-                                                    >
-                                                        <CheckCircle2 className="w-4 h-4" />
-                                                        Chốt án
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <td className="px-5 py-3.5 text-slate-600 font-medium">
-                                                <span className="inline-flex py-1 px-2.5 rounded-md bg-slate-100/80 text-slate-700 text-xs font-mono ring-1 ring-slate-200/60">
-                                                    {row.so_ban_an}
-                                                </span>
-                                            </td>
-                                            <td className="px-5 py-3.5 text-slate-600">{row.nguoi_phai_thi_hanh}</td>
-                                            <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug">
-                                                {row.nghia_vu_thi_hanh ? truncate(row.nghia_vu_thi_hanh, 60) : '—'}
-                                            </td>
-                                            <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug">
-                                                {row.quyet_dinh_buoc_thi_hanh ? truncate(row.quyet_dinh_buoc_thi_hanh, 60) : '—'}
-                                            </td>
-                                            <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug font-medium">
-                                                {row.ket_qua_cuoi_cung ? truncate(row.ket_qua_cuoi_cung, 75) : '—'}
-                                            </td>
-                                            <td className="px-5 py-3.5 text-slate-800 font-semibold">{row.nguoi_khoi_kien}</td>
-                                            <td className="px-5 py-3.5">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setUndoRecord(row); }}
-                                                        title="Hoàn tác"
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-amber-700 bg-amber-50/80 hover:bg-amber-100 transition-colors ring-1 ring-amber-500/20 text-xs font-semibold shadow-sm"
-                                                    >
-                                                        <Undo2 className="w-4 h-4" />
-                                                        Hoàn tác
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </>
-                                    )}
+                                                >
+                                                    {action.icon}
+                                                    {action.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -432,16 +503,16 @@ export default function AnHanhChinhPage() {
                 onSuccess={refreshTimelineRecord}
             />
 
-            {/* Undo confirm */}
+            {/* Status change confirm */}
             <ConfirmModal
-                open={!!undoRecord}
-                title="Hoàn tác Án"
-                message={`Bạn có chắc muốn chuyển "${undoRecord?.so_ban_an}" về trạng thái "Đang thi hành"? Kết quả cuối cùng sẽ bị xóa.`}
-                confirmLabel="Hoàn tác"
+                open={!!statusChangeRecord && !!statusChangeTarget}
+                title={statusChangeTarget?.confirmTitle || ''}
+                message={statusChangeTarget?.confirmMessage(statusChangeRecord?.so_ban_an || '') || ''}
+                confirmLabel="Xác nhận"
                 variant="warning"
-                loading={undoLoading}
-                onConfirm={handleUndo}
-                onCancel={() => setUndoRecord(null)}
+                loading={statusChangeLoading}
+                onConfirm={handleStatusChange}
+                onCancel={() => { setStatusChangeRecord(null); setStatusChangeTarget(null) }}
             />
 
             {/* Bulk Delete confirm */}

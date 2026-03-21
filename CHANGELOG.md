@@ -5,6 +5,27 @@ All notable changes to the **Quản Lý Án Hành Chính** project will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-21
+
+### Added
+- **Trạng thái "Chờ theo dõi":** Bổ sung trạng thái `WATCHING` vào quy trình nghiệp vụ, thêm Tab màu xanh dương tương ứng.
+- **Quy trình chuyển trạng thái:** Thêm các nút điều hướng trạng thái thông minh ở mỗi Tab (ví dụ: Chuyển sang Chờ theo dõi, Hoàn tất án) kèm hộp thoại xác nhận.
+- **Tính năng Timeline nâng cao:**
+  - Tự động sắp xếp quá trình thi hành án theo thời gian thực (Mới nhất lên đầu).
+  - Hỗ trợ chỉnh sửa (**Edit**) và xóa (**Delete**) trực tiếp từng mục trong dòng thời gian.
+  - Form thêm cập nhật mới được tích hợp inline mượt mà.
+
+### Changed
+- **Redesign DetailModal:** Chuyển đổi từ Popup sang giao diện **Toàn màn hình 2 cột**:
+  - Cột trái: Quản lý thông tin hồ sơ với khả năng sửa trực tiếp (Inline Editing).
+  - Cột phải: Quản lý Quá trình Thi Hành Án (Timeline).
+  - Hợp nhất chức năng "Cập nhật Tiến độ" vào làm một với màng hình chi tiết.
+- **Chuẩn hóa dữ liệu hiển thị:** 
+  - Thống nhất cấu trúc 7 cột cho tất cả các Tab: STT, Người khởi kiện, Số Bản án, Người phải thi hành, Nghĩa vụ, Quyết Định buộc thi hành, Quá trình thi hành.
+  - Loại bỏ hoàn toàn các từ viết tắt trên tiêu đề bảng và nhãn trong modal (ví dụ: "QĐ phải TH" ➔ "Quyết Định phải Thi hành án").
+- **Tối ưu trải nghiệm (UX):** Nút "Lưu thay đổi" chỉ xuất hiện khi có sự thay đổi dữ liệu, Footer hiển thị trạng thái lưu trữ thời gian thực.
+
+
 ## [1.0.0] - 2026-03-18
 
 ### Added
