@@ -2,14 +2,13 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { AnHanhChinh, TienDoEntry } from '@/lib/types'
-import { cn, truncate } from '@/lib/utils'
-import { Search, Plus, Pencil, Eye, CheckCircle2, Undo2, RefreshCw, Loader2, Trash2, UploadCloud, ArrowRightCircle, Clock, PauseCircle } from 'lucide-react'
+import { AnHanhChinh, TienDoEntry, QuyetDinhEntry } from '@/lib/types'
+import { cn, truncate, getSoBanAnText, formatQuyetDinh } from '@/lib/utils'
+import { Search, Plus, Pencil, Eye, CheckCircle2, Undo2, RefreshCw, Loader2, Trash2, UploadCloud, ArrowRightCircle, Clock, PauseCircle, Calendar, Building2 } from 'lucide-react'
 import { useToast } from './Toast'
 import AddAnModal from './AddAnModal'
 import CompleteAnModal from './CompleteAnModal'
 import DetailModal from './DetailModal'
-import TimelineModal from './TimelineModal'
 import ConfirmModal from './ConfirmModal'
 import ImportExcelModal from './ImportExcelModal'
 
@@ -45,7 +44,6 @@ export default function AnHanhChinhPage() {
     const [showImportModal, setShowImportModal] = useState(false)
     const [completeRecord, setCompleteRecord] = useState<AnHanhChinh | null>(null)
     const [detailRecord, setDetailRecord] = useState<AnHanhChinh | null>(null)
-    const [timelineRecord, setTimelineRecord] = useState<AnHanhChinh | null>(null)
 
     // Status change confirmation
     const [statusChangeRecord, setStatusChangeRecord] = useState<AnHanhChinh | null>(null)
@@ -87,20 +85,6 @@ export default function AnHanhChinhPage() {
     }, [activeTab, search])
 
     useEffect(() => { fetchData() }, [fetchData])
-
-    // Helper: refresh record
-    const refreshTimelineRecord = useCallback(async () => {
-        if (!timelineRecord) return
-        const { data: fresh } = await supabase
-            .from('an_hanh_chinh')
-            .select('*')
-            .eq('id', timelineRecord.id)
-            .single()
-        if (fresh) {
-            setTimelineRecord(fresh as AnHanhChinh)
-        }
-        fetchData()
-    }, [timelineRecord, fetchData])
 
     // Generic status change handler
     async function handleStatusChange() {
@@ -153,17 +137,43 @@ export default function AnHanhChinhPage() {
 
     function getLatestUpdate(entries: TienDoEntry[]): string {
         if (!entries || entries.length === 0) return '—'
-        const last = entries[entries.length - 1]
+        const last = entries[0]
         return last.content || '—'
     }
 
     function getLatestDate(entries: TienDoEntry[]): string {
         if (!entries || entries.length === 0) return ''
-        const last = entries[entries.length - 1]
+        const last = entries[0]
         if (!last.date) return ''
         const m = last.date.match(/^(\d{4})-(\d{2})-(\d{2})/)
         if (m) return `${m[3]}/${m[2]}/${m[1]}`
         return last.date
+    }
+
+    function renderQuyetDinh(so_ban_an_str: string | null | undefined) {
+        if (!so_ban_an_str) return <span className="text-slate-400 italic text-[13px]">Chưa cập nhật</span>
+        
+        let parsed: QuyetDinhEntry[] = []
+        try {
+            const p = JSON.parse(so_ban_an_str)
+            if (Array.isArray(p)) parsed = p
+            else parsed = [{ so_quyet_dinh: so_ban_an_str, ngay_ban_hanh: '', co_quan_ban_hanh: '' }]
+        } catch {
+            parsed = [{ so_quyet_dinh: so_ban_an_str, ngay_ban_hanh: '', co_quan_ban_hanh: '' }]
+        }
+
+        return (
+            <div className="flex flex-col gap-1">
+                {parsed.map((qd, idx) => {
+                    const text = formatQuyetDinh(qd)
+                    return (
+                        <div key={qd.id || idx} className="text-[13px] font-semibold text-blue-700 bg-blue-50/50 px-2.5 py-1.5 rounded-lg border border-blue-100/50 leading-snug break-words">
+                            • {text || '—'}
+                        </div>
+                    )
+                })}
+            </div>
+        )
     }
 
     // Status transition actions per tab
@@ -407,16 +417,14 @@ export default function AnHanhChinhPage() {
                                     <td className="px-5 py-3.5 text-slate-400 text-center font-mono text-xs font-medium">{idx + 1}</td>
                                     <td className="px-5 py-3.5 text-slate-800 font-semibold">{row.nguoi_khoi_kien}</td>
                                     <td className="px-5 py-3.5 text-slate-600 font-medium">
-                                        <span className="inline-flex py-1 px-2.5 rounded-md bg-slate-100/80 text-slate-700 text-xs font-mono ring-1 ring-slate-200/60">
-                                            {row.so_ban_an}
-                                        </span>
+                                        {renderQuyetDinh(row.so_ban_an)}
                                     </td>
                                     <td className="px-5 py-3.5 text-slate-600">{row.nguoi_phai_thi_hanh}</td>
                                     <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug">
                                         {row.nghia_vu_thi_hanh ? truncate(row.nghia_vu_thi_hanh, 60) : '—'}
                                     </td>
                                     <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug">
-                                        {row.quyet_dinh_buoc_thi_hanh ? truncate(row.quyet_dinh_buoc_thi_hanh, 60) : '—'}
+                                        {renderQuyetDinh(row.quyet_dinh_buoc_thi_hanh)}
                                     </td>
                                     <td className="px-5 py-3.5">
                                         <div className="flex flex-col gap-1">
@@ -430,29 +438,24 @@ export default function AnHanhChinhPage() {
                                         </div>
                                     </td>
                                     <td className="px-5 py-3.5" onClick={e => e.stopPropagation()}>
-                                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                                            {/* Update timeline button */}
-                                            <button
-                                                onClick={() => setTimelineRecord(row)}
-                                                title="Cập nhật tiến độ"
-                                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-600 bg-slate-50/80 hover:bg-slate-100 transition-colors ring-1 ring-slate-200/60 text-xs font-semibold shadow-sm"
-                                            >
-                                                <Pencil className="w-3 h-3" />
-                                                Cập nhật
-                                            </button>
+                                        <div className="flex flex-col items-center justify-center gap-2">
+                                            <span className="text-[10px] font-bold text-slate-400/80 uppercase tracking-wider mb-0.5">Chuyển trạng thái</span>
                                             {/* Status transition buttons */}
                                             {statusActions.map(action => (
                                                 <button
                                                     key={action.targetStatus}
                                                     onClick={() => openStatusChange(row, action)}
-                                                    title={action.label}
+                                                    title={action.confirmTitle}
                                                     className={cn(
-                                                        'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors',
+                                                        'group relative w-full max-w-[135px] flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden',
                                                         action.className
                                                     )}
                                                 >
-                                                    {action.icon}
-                                                    {action.label}
+                                                    <span className="flex items-center gap-1.5 relative z-10">
+                                                        {action.icon}
+                                                        <span>{action.label}</span>
+                                                    </span>
+                                                    <ArrowRightCircle className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 relative z-10" />
                                                 </button>
                                             ))}
                                         </div>
@@ -495,19 +498,11 @@ export default function AnHanhChinhPage() {
                 onSuccess={fetchData}
             />
 
-            {/* Timeline update */}
-            <TimelineModal
-                open={!!timelineRecord}
-                record={timelineRecord}
-                onClose={() => { setTimelineRecord(null); fetchData() }}
-                onSuccess={refreshTimelineRecord}
-            />
-
             {/* Status change confirm */}
             <ConfirmModal
                 open={!!statusChangeRecord && !!statusChangeTarget}
                 title={statusChangeTarget?.confirmTitle || ''}
-                message={statusChangeTarget?.confirmMessage(statusChangeRecord?.so_ban_an || '') || ''}
+                message={statusChangeTarget?.confirmMessage(getSoBanAnText(statusChangeRecord?.so_ban_an)) || ''}
                 confirmLabel="Xác nhận"
                 variant="warning"
                 loading={statusChangeLoading}

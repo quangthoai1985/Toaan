@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { AnHanhChinh, TienDoEntry } from '@/lib/types'
 import { X, Plus, Calendar, Clock, Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, getSoBanAnText } from '@/lib/utils'
 import { useToast } from './Toast'
 import DateInput from './DateInput'
 
@@ -77,7 +77,7 @@ export default function TimelineModal({ open, record, onClose, onSuccess }: Prop
                         </div>
                         <div>
                             <h2 className="text-lg font-semibold text-slate-800">Cập nhật Tiến độ</h2>
-                            <p className="text-xs text-slate-500">{record.so_ban_an} — {record.nguoi_khoi_kien}</p>
+                            <p className="text-xs text-slate-500">{getSoBanAnText(record.so_ban_an)} — {record.nguoi_khoi_kien}</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
