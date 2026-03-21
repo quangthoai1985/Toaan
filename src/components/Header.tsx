@@ -1,9 +1,13 @@
 'use client'
 
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Scale } from 'lucide-react'
+import { Scale, LayoutDashboard, Building2 } from 'lucide-react'
 
 export default function Header() {
+    const pathname = usePathname()
+    
     return (
         <header className="bg-red-950 border-b border-red-900/40 sticky top-0 z-50 h-[4.5rem] shadow-sm">
             <div className="flex items-stretch h-full w-full">
@@ -16,6 +20,34 @@ export default function Header() {
                         <h1 className="font-bold text-white text-[15px] tracking-wide">QUẢN LÝ ÁN HÀNH CHÍNH</h1>
                         <p className="text-red-200/60 text-[11px] mt-0.5 uppercase tracking-wider font-medium">Sở Tư pháp · An Giang</p>
                     </div>
+                </div>
+
+                {/* Navigation Links */}
+                <div className="flex items-center gap-1.5 ml-6 h-full">
+                    <Link 
+                        href="/dashboard"
+                        className={cn(
+                            "flex items-center gap-2 px-4 h-full border-b-2 text-sm font-semibold transition-colors",
+                            pathname.startsWith('/dashboard') || pathname === '/'
+                                ? "border-red-400 text-white bg-white/5" 
+                                : "border-transparent text-red-100/60 hover:text-red-100 hover:bg-white/5"
+                        )}
+                    >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Quản lý Án
+                    </Link>
+                    <Link 
+                        href="/co-quan"
+                        className={cn(
+                            "flex items-center gap-2 px-4 h-full border-b-2 text-sm font-semibold transition-colors",
+                            pathname.startsWith('/co-quan')
+                                ? "border-red-400 text-white bg-white/5" 
+                                : "border-transparent text-red-100/60 hover:text-red-100 hover:bg-white/5"
+                        )}
+                    >
+                        <Building2 className="w-4 h-4" />
+                        Danh mục Cơ quan
+                    </Link>
                 </div>
 
                 {/* Spacer */}

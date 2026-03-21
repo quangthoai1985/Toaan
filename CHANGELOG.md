@@ -5,6 +5,29 @@ All notable changes to the **Quản Lý Án Hành Chính** project will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-03-21
+
+### Added
+- **Trang Quản lý Danh mục Cơ quan:** Xây dựng trang `/co-quan` hoàn chỉnh với các tính năng:
+  - Phân loại đơn vị theo 3 cấp: Cấp tỉnh, Sở Ngành, Cấp xã.
+  - Chức năng CRUD (Thêm, Sửa, Xóa) cơ quan trực tiếp trên giao diện.
+  - Bộ lọc tìm kiếm nhanh và hiển thị số lượng item theo từng tab.
+  - Giao diện tối ưu với thanh cuộn độc lập cho danh sách, cố định Header và Tabs.
+- **Import dữ liệu hành chính:** Script tự động parse file `DVHC.xlsx` và import 204 bản ghi (UBND và Chủ tịch UBND) của 102 đơn vị cấp xã vào database.
+- **Validation Dropdown bắt buộc:** Áp dụng ràng buộc dữ liệu cho ô "Người phải thi hành" ở cả `AddAnModal` và `DetailModal`. Bắt buộc chọn từ danh sách có sẵn, tô đỏ cảnh báo nếu nhập sai.
+
+### Changed
+- **Nâng cấp Form Thêm Án Mới (AddAnModal):** 
+  - Đồng bộ giao diện 2 cột và các thành phần nhập liệu cao cấp từ `DetailModal`.
+  - Hỗ trợ nhập mảng (Array) cho "Số bản án/Quyết định" và "Quyết định buộc thi hành án" (thêm được nhiều mục cùng lúc).
+  - Tích hợp `EditableCombobox` để chọn đơn vị thi hành từ danh mục.
+  - Tự động tạo mốc sự kiện đầu tiên trong Timeline khi khởi tạo hồ sơ.
+- **Cập nhật Header:** Bổ sung menu điều hướng giữa "Quản lý Án" và "Danh mục Cơ quan".
+
+### Fixed
+- Lỗi font chữ màu trắng khó nhìn trên input popup biên tập.
+- Lỗi thiếu `ToastProvider` khi truy cập trang danh mục do sai cấu trúc thư mục App Router.
+
 ## [1.1.0] - 2026-03-21
 
 ### Added

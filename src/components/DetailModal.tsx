@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { AnHanhChinh, TienDoEntry } from '@/lib/types'
+import { AnHanhChinh, TienDoEntry, QuyetDinhEntry } from '@/lib/types'
 import {
     X, FileText, Calendar, User, Building2, Scale, Clock,
     Pencil, Loader2, Save, Plus, Trash2, ChevronDown, ChevronUp,
     CheckCircle2, AlertCircle, Eye, EyeOff
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, formatQuyetDinh } from '@/lib/utils'
 import { useToast } from './Toast'
+import DateInput from './DateInput' // Added DateInput import
 
 interface Props {
     open: boolean
@@ -126,6 +127,115 @@ function EditableField({
     )
 }
 
+// ——— EditableCombobox —————————————————————————————
+function EditableCombobox({
+    label, value, onChange, options, colorClass = 'bg-slate-50 border-slate-200',
+    emptyLabel = 'Chưa có dữ liệu', emptyColor = 'text-slate-400'
+}: {
+    label: string
+    value: string
+    onChange: (v: string) => void
+    options: { id: string, ten_co_quan: string, cap_co_quan?: string }[]
+    colorClass?: string
+    emptyLabel?: string
+    emptyColor?: string
+}) {
+    const [editing, setEditing] = useState(false)
+    const [search, setSearch] = useState('')
+    const [isOpen, setIsOpen] = useState(false)
+    const wrapperRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (editing) {
+            setSearch(value)
+            setIsOpen(true)
+        } else {
+            setIsOpen(false)
+        }
+    }, [editing, value])
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setIsOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
+    const filteredOptions = options.filter(o => o.ten_co_quan.toLowerCase().includes(search.toLowerCase()))
+
+    return (
+        <div className="space-y-1.5" ref={wrapperRef}>
+            <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
+                <button
+                    onClick={() => setEditing(e => !e)}
+                    className="flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                    {editing ? <><EyeOff className="w-3 h-3" />Đóng</> : <><Pencil className="w-3 h-3" />Sửa</>}
+                </button>
+            </div>
+            {editing ? (
+                <div className="relative">
+                    <input
+                        value={search}
+                        onChange={e => {
+                            setSearch(e.target.value)
+                            setIsOpen(true)
+                        }}
+                        onFocus={() => setIsOpen(true)}
+                        placeholder="Tìm kiếm cơ quan..."
+                        className={cn(
+                            "w-full border rounded-lg px-3 py-2 text-sm transition-all outline-none",
+                            search.trim().length > 0 && !options.some(o => o.ten_co_quan.toLowerCase() === search.trim().toLowerCase())
+                                ? "bg-red-50/20 border-red-400 text-red-700 focus:ring-2 focus:ring-red-200"
+                                : "bg-white border-blue-300 text-slate-800 focus:ring-2 focus:ring-blue-100"
+                        )}
+                        autoFocus
+                    />
+                    {search.trim().length > 0 && !options.some(o => o.ten_co_quan.toLowerCase() === search.trim().toLowerCase()) && !isOpen && (
+                        <p className="text-[10px] text-red-500 font-medium absolute -bottom-4 left-1">⚠️ Bắt buộc chọn từ danh sách</p>
+                    )}
+                    {isOpen && (
+                        <div className="absolute z-[150] w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            {filteredOptions.length === 0 ? (
+                                <div className="p-3 text-sm text-slate-500 italic text-center">Không tìm thấy kết quả</div>
+                            ) : (
+                                <ul className="py-1">
+                                    {filteredOptions.map(opt => (
+                                        <li
+                                            key={opt.id}
+                                            onClick={() => {
+                                                onChange(opt.ten_co_quan)
+                                                setSearch(opt.ten_co_quan)
+                                                setIsOpen(false)
+                                                setEditing(false)
+                                            }}
+                                            className="px-3 py-2 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer"
+                                        >
+                                            {opt.ten_co_quan} {opt.cap_co_quan && <span className="text-[10px] text-slate-400 ml-1">({opt.cap_co_quan})</span>}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className={cn('rounded-lg px-3 py-2.5 text-sm leading-relaxed border min-h-[40px]', colorClass)}>
+                    {value ? (
+                        <span className="text-slate-800 whitespace-pre-wrap">{value}</span>
+                    ) : (
+                        <span className={cn('italic', emptyColor)}>{emptyLabel}</span>
+                    )}
+                </div>
+            )}
+        </div>
+    )
+}
+
 // ——— AddProgressForm ——————————————————————————————
 function AddProgressForm({ onAdd }: { onAdd: (entry: TienDoEntry) => void }) {
     const [open, setOpen] = useState(false)
@@ -208,11 +318,24 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
     const toast = useToast()
 
     const [form, setForm] = useState<Partial<AnHanhChinh>>({})
+    const [danhSachQuyetDinh, setDanhSachQuyetDinh] = useState<QuyetDinhEntry[]>([])
+    const [originalDanhSachQuyetDinh, setOriginalDanhSachQuyetDinh] = useState<QuyetDinhEntry[]>([])
+    const [danhSachQuyetDinhBuoc, setDanhSachQuyetDinhBuoc] = useState<QuyetDinhEntry[]>([])
+    const [originalDanhSachQuyetDinhBuoc, setOriginalDanhSachQuyetDinhBuoc] = useState<QuyetDinhEntry[]>([])
     const [timeline, setTimeline] = useState<TienDoEntry[]>([])
     const [originalTimeline, setOriginalTimeline] = useState<TienDoEntry[]>([])
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
     const [editingEntry, setEditingEntry] = useState<{ date: string; content: string }>({ date: '', content: '' })
     const [loading, setLoading] = useState(false)
+    const [dmCoQuan, setDmCoQuan] = useState<{id: string, ten_co_quan: string, cap_co_quan: string}[]>([])
+
+    useEffect(() => {
+        async function fetchDm() {
+            const { data } = await supabase.from('dm_co_quan').select('*').order('cap_co_quan', { ascending: true })
+            if (data) setDmCoQuan(data)
+        }
+        fetchDm()
+    }, [supabase])
 
     useEffect(() => {
         if (open && record) {
@@ -227,6 +350,78 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             const tl = Array.isArray(record.tien_do_cap_nhat) ? record.tien_do_cap_nhat : []
             setTimeline(sortByDateDesc(tl))
             setOriginalTimeline(sortByDateDesc(tl))
+            
+            let parsedQD: QuyetDinhEntry[] = []
+            try {
+                if (record.so_ban_an) {
+                    const parsed = JSON.parse(record.so_ban_an)
+                    if (Array.isArray(parsed)) {
+                        parsedQD = parsed
+                    } else {
+                        parsedQD = [{
+                            id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+                            so_quyet_dinh: record.so_ban_an,
+                            ngay_ban_hanh: '',
+                            co_quan_ban_hanh: ''
+                        }]
+                    }
+                }
+            } catch (e) {
+                if (record.so_ban_an) {
+                    parsedQD = [{
+                        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+                        so_quyet_dinh: record.so_ban_an,
+                        ngay_ban_hanh: '',
+                        co_quan_ban_hanh: ''
+                    }]
+                }
+            }
+            if (parsedQD.length === 0) {
+                 parsedQD = [{
+                     id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+                     so_quyet_dinh: '',
+                     ngay_ban_hanh: '',
+                     co_quan_ban_hanh: ''
+                 }]
+            }
+            setDanhSachQuyetDinh(parsedQD)
+            setOriginalDanhSachQuyetDinh(JSON.parse(JSON.stringify(parsedQD)))
+
+            let parsedQDBuoc: QuyetDinhEntry[] = []
+            try {
+                if (record.quyet_dinh_buoc_thi_hanh) {
+                    const parsed = JSON.parse(record.quyet_dinh_buoc_thi_hanh)
+                    if (Array.isArray(parsed)) {
+                        parsedQDBuoc = parsed
+                    } else {
+                        parsedQDBuoc = [{
+                            id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+                            so_quyet_dinh: record.quyet_dinh_buoc_thi_hanh,
+                            ngay_ban_hanh: '',
+                            co_quan_ban_hanh: ''
+                        }]
+                    }
+                }
+            } catch (e) {
+                if (record.quyet_dinh_buoc_thi_hanh) {
+                    parsedQDBuoc = [{
+                        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+                        so_quyet_dinh: record.quyet_dinh_buoc_thi_hanh,
+                        ngay_ban_hanh: '',
+                        co_quan_ban_hanh: ''
+                    }]
+                }
+            }
+            if (parsedQDBuoc.length === 0) {
+                 parsedQDBuoc = [{
+                     id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+                     so_quyet_dinh: '',
+                     ngay_ban_hanh: '',
+                     co_quan_ban_hanh: ''
+                 }]
+            }
+            setDanhSachQuyetDinhBuoc(parsedQDBuoc)
+            setOriginalDanhSachQuyetDinhBuoc(JSON.parse(JSON.stringify(parsedQDBuoc)))
         }
     }, [open, record])
 
@@ -262,17 +457,47 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
         setEditingEntryId(null)
     }
 
+    const updateQuyetDinh = (id: string, field: keyof QuyetDinhEntry, value: string) => {
+        setDanhSachQuyetDinh(prev => prev.map(qd => qd.id === id ? { ...qd, [field]: value } : qd))
+    }
+    const addQuyetDinh = () => {
+        setDanhSachQuyetDinh(prev => [...prev, {
+            id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+            so_quyet_dinh: '',
+            ngay_ban_hanh: '',
+            co_quan_ban_hanh: ''
+        }])
+    }
+    const removeQuyetDinh = (id: string) => {
+        setDanhSachQuyetDinh(prev => prev.filter(qd => qd.id !== id))
+    }
+
+    const updateQuyetDinhBuoc = (id: string, field: keyof QuyetDinhEntry, value: string) => {
+        setDanhSachQuyetDinhBuoc(prev => prev.map(qd => qd.id === id ? { ...qd, [field]: value } : qd))
+    }
+    const addQuyetDinhBuoc = () => {
+        setDanhSachQuyetDinhBuoc(prev => [...prev, {
+            id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+            so_quyet_dinh: '',
+            ngay_ban_hanh: '',
+            co_quan_ban_hanh: ''
+        }])
+    }
+    const removeQuyetDinhBuoc = (id: string) => {
+        setDanhSachQuyetDinhBuoc(prev => prev.filter(qd => qd.id !== id))
+    }
+
     const hasChanges = () => {
         if (!record) return false
         const formChanged =
-            (form.so_ban_an ?? '') !== (record.so_ban_an ?? '') ||
             (form.nguoi_khoi_kien ?? '') !== (record.nguoi_khoi_kien ?? '') ||
             (form.nguoi_phai_thi_hanh ?? '') !== (record.nguoi_phai_thi_hanh ?? '') ||
             (form.nghia_vu_thi_hanh ?? '') !== (record.nghia_vu_thi_hanh ?? '') ||
-            (form.quyet_dinh_buoc_thi_hanh ?? '') !== (record.quyet_dinh_buoc_thi_hanh ?? '') ||
             (form.ket_qua_cuoi_cung ?? '') !== (record.ket_qua_cuoi_cung ?? '')
         const tlChanged = JSON.stringify(timeline) !== JSON.stringify(originalTimeline)
-        return formChanged || tlChanged
+        const qdChanged = JSON.stringify(danhSachQuyetDinh) !== JSON.stringify(originalDanhSachQuyetDinh)
+        const qdBuocChanged = JSON.stringify(danhSachQuyetDinhBuoc) !== JSON.stringify(originalDanhSachQuyetDinhBuoc)
+        return formChanged || tlChanged || qdChanged || qdBuocChanged
     }
 
     const handleSave = async () => {
@@ -280,11 +505,11 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
         setLoading(true)
 
         const payload = {
-            so_ban_an: form.so_ban_an,
+            so_ban_an: JSON.stringify(danhSachQuyetDinh),
             nguoi_khoi_kien: form.nguoi_khoi_kien,
             nguoi_phai_thi_hanh: form.nguoi_phai_thi_hanh,
             nghia_vu_thi_hanh: form.nghia_vu_thi_hanh || null,
-            quyet_dinh_buoc_thi_hanh: form.quyet_dinh_buoc_thi_hanh || null,
+            quyet_dinh_buoc_thi_hanh: JSON.stringify(danhSachQuyetDinhBuoc),
             ket_qua_cuoi_cung: form.ket_qua_cuoi_cung || null,
             tien_do_cap_nhat: timeline,
         }
@@ -299,6 +524,8 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
 
         toast.success('Đã lưu thay đổi thành công!')
         setOriginalTimeline(timeline)
+        setOriginalDanhSachQuyetDinh(JSON.parse(JSON.stringify(danhSachQuyetDinh)))
+        setOriginalDanhSachQuyetDinhBuoc(JSON.parse(JSON.stringify(danhSachQuyetDinhBuoc)))
         Object.assign(record, payload)
         if (onSuccess) onSuccess()
     }
@@ -326,7 +553,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                         <div>
                             <p className="text-xs text-slate-400 font-medium">Chi tiết án hành chính</p>
                             <h2 className="text-base font-bold text-slate-800 leading-tight line-clamp-1 max-w-[500px]">
-                                {record.so_ban_an || 'Chưa có số bản án'}
+                                {danhSachQuyetDinh.map(formatQuyetDinh).filter(Boolean).join('; ') || 'Chưa có số bản án'}
                             </h2>
                         </div>
                         <span className={cn(
@@ -350,7 +577,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                         )}
                         <button
                             onClick={onClose}
-                            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="p-2 text-red-500 hover:text-white hover:bg-red-600 hover:rotate-90 rounded-xl transition-all duration-300 bg-red-50/50 border border-red-100/50 shadow-sm px-2.5"
                             title="Đóng"
                         >
                             <X className="w-5 h-5" />
@@ -369,8 +596,8 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                 <h3 className="text-sm font-bold text-slate-600 uppercase tracking-widest">Thông tin án</h3>
                             </div>
 
-                            {/* 3-column info grid */}
-                            <div className="grid grid-cols-3 gap-4">
+                            {/* 2-column info grid */}
+                            <div className="grid grid-cols-2 gap-4">
                                 {/* Người khởi kiện */}
                                 <div className="bg-white rounded-xl border border-amber-100 p-4 space-y-1.5 shadow-sm">
                                     <div className="flex items-center gap-1.5 mb-2">
@@ -396,32 +623,74 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                         </div>
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Người phải thi hành</span>
                                     </div>
-                                    <EditableField
+                                    <EditableCombobox
                                         label=""
                                         value={form.nguoi_phai_thi_hanh ?? ''}
                                         onChange={v => updateField('nguoi_phai_thi_hanh', v)}
+                                        options={dmCoQuan}
                                         colorClass="bg-red-50/50 border-red-100"
                                         emptyColor="text-red-300"
                                     />
                                 </div>
+                            </div>
 
-                                {/* Số Bản án */}
-                                <div className="bg-white rounded-xl border border-blue-100 p-4 space-y-1.5 shadow-sm">
-                                    <div className="flex items-center gap-1.5 mb-2">
-                                        <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
-                                            <FileText className="w-3.5 h-3.5 text-blue-600" />
-                                        </div>
-                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Số Bản án (Quyết Định phải Thi hành án)</span>
+                            {/* Các Quyết Định / Bản Án Array Editor */}
+                            <div className="bg-white rounded-xl border border-blue-100 p-5 space-y-3 shadow-sm">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                    <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
+                                        <FileText className="w-3.5 h-3.5 text-blue-600" />
                                     </div>
-                                    <EditableField
-                                        label=""
-                                        value={form.so_ban_an ?? ''}
-                                        onChange={v => updateField('so_ban_an', v)}
-                                        multiline
-                                        colorClass="bg-blue-50/50 border-blue-100"
-                                        emptyColor="text-blue-300"
-                                    />
+                                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Các BẢN ÁN / QUYẾT ĐỊNH (<span className="text-blue-600">{danhSachQuyetDinh.length}</span>)</span>
                                 </div>
+                                
+                                <div className="space-y-3">
+                                    {danhSachQuyetDinh.map((qd, index) => (
+                                        <div key={qd.id || index} className="p-3 bg-blue-50/30 border border-blue-100/60 rounded-xl relative group transition-colors hover:bg-blue-50/60 hover:border-blue-200">
+                                            {danhSachQuyetDinh.length > 1 && (
+                                                <button 
+                                                    onClick={() => removeQuyetDinh(qd.id!)}
+                                                    className="absolute -top-2 -right-2 w-[22px] h-[22px] bg-white border border-red-200 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 opacity-0 group-hover:opacity-100 transition-all shadow-sm z-10"
+                                                    title="Xóa mục này"
+                                                >
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
+                                            )}
+                                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px_1.5fr] gap-3">
+                                                <div>
+                                                    <label className="text-[10px] uppercase font-bold text-blue-600/70 tracking-wide mb-1 block">Số Bản án/QĐ</label>
+                                                    <input 
+                                                        value={qd.so_quyet_dinh}
+                                                        onChange={e => updateQuyetDinh(qd.id!, 'so_quyet_dinh', e.target.value)}
+                                                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-2.5 py-1.5 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all shadow-sm"
+                                                        placeholder="VD: 01/2025/HC-ST"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] uppercase font-bold text-blue-600/70 tracking-wide mb-1 block">Ngày ban hành</label>
+                                                    <DateInput 
+                                                        value={qd.ngay_ban_hanh}
+                                                        onChange={val => updateQuyetDinh(qd.id!, 'ngay_ban_hanh', val)}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] uppercase font-bold text-blue-600/70 tracking-wide mb-1 block">Cơ quan ban hành</label>
+                                                    <input 
+                                                        value={qd.co_quan_ban_hanh}
+                                                        onChange={e => updateQuyetDinh(qd.id!, 'co_quan_ban_hanh', e.target.value)}
+                                                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-2.5 py-1.5 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all shadow-sm"
+                                                        placeholder="VD: TAND Tỉnh..."
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={addQuyetDinh}
+                                    className="w-full mt-2 py-2 flex items-center justify-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50/50 hover:bg-blue-100/80 border-2 border-blue-200 border-dashed rounded-xl transition-all active:scale-[0.99]"
+                                >
+                                    <Plus className="w-4 h-4" /> THÊM QUYẾT ĐỊNH
+                                </button>
                             </div>
 
                             {/* Nghĩa vụ phải thi hành án */}
@@ -435,18 +704,63 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                     emptyLabel="Chưa có dữ liệu"
                                 />
                             </div>
-
-                            {/* QĐ buộc thi hành án */}
-                            <div className="bg-white rounded-xl border border-orange-100 p-5 shadow-sm">
-                                <EditableField
-                                    label="QĐ buộc Thi hành án"
-                                    value={form.quyet_dinh_buoc_thi_hanh ?? ''}
-                                    onChange={v => updateField('quyet_dinh_buoc_thi_hanh', v)}
-                                    multiline
-                                    colorClass="bg-orange-50/50 border-orange-100"
-                                    emptyColor="text-orange-300"
-                                    emptyLabel="Chưa có dữ liệu"
-                                />
+                            {/* QĐ buộc thi hành án Array Editor */}
+                            <div className="bg-white rounded-xl border border-orange-200 p-5 space-y-3 shadow-sm">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                    <div className="w-6 h-6 rounded-md bg-orange-50 flex items-center justify-center">
+                                        <AlertCircle className="w-3.5 h-3.5 text-orange-600" />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">CÁC QĐ BUỘC THI HÀNH ÁN (<span className="text-orange-600">{danhSachQuyetDinhBuoc.length}</span>)</span>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                    {danhSachQuyetDinhBuoc.map((qd, index) => (
+                                        <div key={qd.id || index} className="p-3 bg-orange-50/50 border border-orange-100 rounded-xl relative group transition-colors hover:bg-orange-50 hover:border-orange-200">
+                                            {danhSachQuyetDinhBuoc.length > 1 && (
+                                                <button 
+                                                    onClick={() => removeQuyetDinhBuoc(qd.id!)}
+                                                    className="absolute -top-2 -right-2 w-[22px] h-[22px] bg-white border border-red-200 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 opacity-0 group-hover:opacity-100 transition-all shadow-sm z-10"
+                                                    title="Xóa mục này"
+                                                >
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
+                                            )}
+                                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px_1.5fr] gap-3">
+                                                <div>
+                                                    <label className="text-[10px] uppercase font-bold text-orange-600/80 tracking-wide mb-1 block">Số Quyết định</label>
+                                                    <input 
+                                                        value={qd.so_quyet_dinh}
+                                                        onChange={e => updateQuyetDinhBuoc(qd.id!, 'so_quyet_dinh', e.target.value)}
+                                                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-2.5 py-1.5 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300 transition-all shadow-sm"
+                                                        placeholder="VD: 02/2026/QĐ-BTHA"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] uppercase font-bold text-orange-600/80 tracking-wide mb-1 block">Ngày ban hành</label>
+                                                    <DateInput 
+                                                        value={qd.ngay_ban_hanh}
+                                                        onChange={val => updateQuyetDinhBuoc(qd.id!, 'ngay_ban_hanh', val)}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] uppercase font-bold text-orange-600/80 tracking-wide mb-1 block">Cơ quan ban hành</label>
+                                                    <input 
+                                                        value={qd.co_quan_ban_hanh}
+                                                        onChange={e => updateQuyetDinhBuoc(qd.id!, 'co_quan_ban_hanh', e.target.value)}
+                                                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-2.5 py-1.5 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300 transition-all shadow-sm"
+                                                        placeholder="VD: TAND Tỉnh..."
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={addQuyetDinhBuoc}
+                                    className="w-full mt-2 py-2 flex items-center justify-center gap-1.5 text-xs font-bold text-orange-600 bg-orange-50/50 hover:bg-orange-100 border-2 border-orange-200 border-dashed rounded-xl transition-all active:scale-[0.99]"
+                                >
+                                    <Plus className="w-4 h-4" /> THÊM QĐ BUỘC
+                                </button>
                             </div>
 
                             {/* Kết quả cuối cùng — always visible */}
@@ -531,7 +845,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                                                         type="date"
                                                                         value={editingEntry.date}
                                                                         onChange={e => setEditingEntry(prev => ({ ...prev, date: e.target.value }))}
-                                                                        className="w-full bg-white border border-blue-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                                                        className="w-full bg-white text-slate-800 font-medium border border-blue-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
                                                                     />
                                                                 </div>
                                                                 <div>
@@ -539,7 +853,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                                                     <textarea
                                                                         value={editingEntry.content}
                                                                         onChange={e => setEditingEntry(prev => ({ ...prev, content: e.target.value }))}
-                                                                        className="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 min-h-[70px] resize-none"
+                                                                        className="w-full bg-white text-slate-800 font-medium border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 min-h-[70px] resize-none"
                                                                         autoFocus
                                                                     />
                                                                 </div>
@@ -621,7 +935,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                         <button
                             onClick={onClose}
                             disabled={loading}
-                            className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+                            className="px-6 py-2 text-sm font-bold text-red-600 bg-white border-2 border-red-100 rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 hover:shadow-[0_8px_20px_-6px_rgba(220,38,38,0.4)] transition-all duration-300 active:scale-95 disabled:opacity-50"
                         >
                             Đóng
                         </button>
