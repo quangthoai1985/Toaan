@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { AnHanhChinh } from '@/lib/types'
 import { X, CheckCircle2, Loader2 } from 'lucide-react'
+import { getSoBanAnText } from '@/lib/utils'
 import { useToast } from './Toast'
 
 interface Props {
@@ -70,7 +71,7 @@ export default function CompleteAnModal({ open, record, onClose, onSuccess }: Pr
                 {/* Info */}
                 <div className="px-6 pt-4">
                     <div className="bg-slate-50 rounded-lg p-3 text-sm space-y-1">
-                        <p><span className="text-slate-500">Số bản án:</span> <span className="font-medium text-slate-700">{record.so_ban_an}</span></p>
+                        <p><span className="text-slate-500">Số bản án:</span> <span className="font-medium text-slate-700">{getSoBanAnText(record.so_ban_an)}</span></p>
                         <p><span className="text-slate-500">Người khởi kiện:</span> <span className="font-medium text-slate-700">{record.nguoi_khoi_kien}</span></p>
                         <p><span className="text-slate-500">Người phải TH:</span> <span className="font-medium text-slate-700">{record.nguoi_phai_thi_hanh}</span></p>
                     </div>

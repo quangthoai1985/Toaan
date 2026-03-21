@@ -135,9 +135,10 @@ export default function DateInput({ value, onChange, className, placeholder = 'd
                     value={text}
                     onChange={e => handleTextChange(e.target.value)}
                     onFocus={() => setOpen(true)}
+                    onClick={() => setOpen(true)}
                     placeholder={placeholder}
                     className={cn(
-                        'w-full pr-9 px-3 py-2 text-sm border border-slate-200 rounded-xl',
+                        'w-full pr-9 px-3 py-2 text-sm text-slate-800 font-medium border border-slate-200 rounded-xl',
                         'focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent',
                         'bg-white hover:bg-white transition-colors',
                         className
@@ -160,16 +161,31 @@ export default function DateInput({ value, onChange, className, placeholder = 'd
 
             {open && (
                 <div className="absolute z-50 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 min-w-[260px]"
-                    onMouseDown={e => e.preventDefault()}>
+                    onMouseDown={e => { if ((e.target as HTMLElement).tagName !== 'SELECT') e.preventDefault() }}>
                     {/* Header tháng/năm */}
                     <div className="flex items-center justify-between mb-2">
                         <button type="button" onClick={prevMonth}
                             className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition-colors">
                             ‹
                         </button>
-                        <span className="text-sm font-semibold text-slate-700">
-                            {VI_MONTHS[viewMonth]} {viewYear}
-                        </span>
+                        <div className="flex items-center gap-1">
+                            <select 
+                                value={viewMonth} 
+                                onChange={e => setViewMonth(Number(e.target.value))}
+                                className="text-sm font-semibold text-slate-700 bg-transparent cursor-pointer hover:bg-slate-100 rounded py-1 px-1 outline-none focus:ring-2 focus:ring-blue-100"
+                            >
+                                {VI_MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                            </select>
+                            <select 
+                                value={viewYear} 
+                                onChange={e => setViewYear(Number(e.target.value))}
+                                className="text-sm font-semibold text-slate-700 bg-transparent cursor-pointer hover:bg-slate-100 rounded py-1 outline-none focus:ring-2 focus:ring-blue-100"
+                            >
+                                {Array.from({length: 150}, (_, i) => new Date().getFullYear() - 100 + i).map(y => (
+                                    <option key={y} value={y}>{y}</option>
+                                ))}
+                            </select>
+                        </div>
                         <button type="button" onClick={nextMonth}
                             className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition-colors">
                             ›

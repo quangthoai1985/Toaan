@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { X, UploadCloud, Loader2, AlertCircle, FileSpreadsheet, CheckCircle2, ChevronDown } from 'lucide-react'
+import { X, UploadCloud, Loader2, AlertCircle, FileSpreadsheet, CheckCircle2, FileDown, Eye, ChevronDown } from 'lucide-react'
 import { useToast } from './Toast'
 import * as xlsx from 'xlsx'
+import { cn, parseQuyetDinhList } from '@/lib/utils'
 import { AnHanhChinh, TienDoEntry } from '@/lib/types'
 
 interface Props {
@@ -143,12 +144,21 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
                     ketQua = null;
                 }
 
+                const parsedQuyetDinh = soBanAn ? parseQuyetDinhList(soBanAn) : [{
+                    id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+                    so_quyet_dinh: 'Chưa cập nhật',
+                    ngay_ban_hanh: '',
+                    co_quan_ban_hanh: ''
+                }]
+                
+                const parsedQuyetDinhBuoc = quyetDinh ? parseQuyetDinhList(quyetDinh) : []
+
                 records.push({
-                    so_ban_an: soBanAn || 'Chưa cập nhật',
+                    so_ban_an: JSON.stringify(parsedQuyetDinh),
                     nguoi_khoi_kien: nguoiKhoiKien || 'Chưa cập nhật',
                     nguoi_phai_thi_hanh: nguoiPhaiThiHanh || 'Chưa cập nhật',
                     nghia_vu_thi_hanh: nghiaVu,
-                    quyet_dinh_buoc_thi_hanh: quyetDinh,
+                    quyet_dinh_buoc_thi_hanh: parsedQuyetDinhBuoc.length > 0 ? JSON.stringify(parsedQuyetDinhBuoc) : null,
                     status: importStatus,
                     ket_qua_cuoi_cung: ketQua,
                     tien_do_cap_nhat: tienDoList,
