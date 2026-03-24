@@ -6,7 +6,7 @@ import { AnHanhChinh, TienDoEntry, QuyetDinhEntry } from '@/lib/types'
 import {
     X, FileText, Calendar, User, Building2, Scale, Clock,
     Pencil, Loader2, Save, Plus, Trash2, ChevronDown, ChevronUp,
-    CheckCircle2, AlertCircle, Eye, EyeOff
+    CheckCircle2, AlertCircle, Eye, EyeOff, ArrowRightCircle
 } from 'lucide-react'
 import { cn, formatQuyetDinh } from '@/lib/utils'
 import { useToast } from './Toast'
@@ -77,7 +77,7 @@ function EditableField({
     label, value, onChange, multiline = false, colorClass = 'bg-slate-50 border-slate-200',
     emptyLabel = 'Chưa có dữ liệu', emptyColor = 'text-slate-400'
 }: {
-    label: string
+    label: React.ReactNode
     value: string
     onChange: (v: string) => void
     multiline?: boolean
@@ -132,7 +132,7 @@ function EditableCombobox({
     label, value, onChange, options, colorClass = 'bg-slate-50 border-slate-200',
     emptyLabel = 'Chưa có dữ liệu', emptyColor = 'text-slate-400'
 }: {
-    label: string
+    label: React.ReactNode
     value: string
     onChange: (v: string) => void
     options: { id: string, ten_co_quan: string, cap_co_quan?: string }[]
@@ -345,6 +345,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                 nguoi_phai_thi_hanh: record.nguoi_phai_thi_hanh ?? '',
                 nghia_vu_thi_hanh: record.nghia_vu_thi_hanh ?? '',
                 quyet_dinh_buoc_thi_hanh: record.quyet_dinh_buoc_thi_hanh ?? '',
+                ly_do_cho_theo_doi: record.ly_do_cho_theo_doi ?? '',
                 ket_qua_cuoi_cung: record.ket_qua_cuoi_cung ?? '',
             })
             const tl = Array.isArray(record.tien_do_cap_nhat) ? record.tien_do_cap_nhat : []
@@ -493,6 +494,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             (form.nguoi_khoi_kien ?? '') !== (record.nguoi_khoi_kien ?? '') ||
             (form.nguoi_phai_thi_hanh ?? '') !== (record.nguoi_phai_thi_hanh ?? '') ||
             (form.nghia_vu_thi_hanh ?? '') !== (record.nghia_vu_thi_hanh ?? '') ||
+            (form.ly_do_cho_theo_doi ?? '') !== (record.ly_do_cho_theo_doi ?? '') ||
             (form.ket_qua_cuoi_cung ?? '') !== (record.ket_qua_cuoi_cung ?? '')
         const tlChanged = JSON.stringify(timeline) !== JSON.stringify(originalTimeline)
         const qdChanged = JSON.stringify(danhSachQuyetDinh) !== JSON.stringify(originalDanhSachQuyetDinh)
@@ -510,6 +512,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             nguoi_phai_thi_hanh: form.nguoi_phai_thi_hanh,
             nghia_vu_thi_hanh: form.nghia_vu_thi_hanh || null,
             quyet_dinh_buoc_thi_hanh: JSON.stringify(danhSachQuyetDinhBuoc),
+            ly_do_cho_theo_doi: form.ly_do_cho_theo_doi || null,
             ket_qua_cuoi_cung: form.ket_qua_cuoi_cung || null,
             tien_do_cap_nhat: timeline,
         }
@@ -528,6 +531,35 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
         setOriginalDanhSachQuyetDinhBuoc(JSON.parse(JSON.stringify(danhSachQuyetDinhBuoc)))
         Object.assign(record, payload)
         if (onSuccess) onSuccess()
+    }
+
+    const handleMoveToStatus = async (status: 'WATCHING' | 'COMPLETED') => {
+        if (!record) return
+        setLoading(true)
+
+        const payload = {
+            so_ban_an: JSON.stringify(danhSachQuyetDinh),
+            nguoi_khoi_kien: form.nguoi_khoi_kien,
+            nguoi_phai_thi_hanh: form.nguoi_phai_thi_hanh,
+            nghia_vu_thi_hanh: form.nghia_vu_thi_hanh || null,
+            quyet_dinh_buoc_thi_hanh: JSON.stringify(danhSachQuyetDinhBuoc),
+            ly_do_cho_theo_doi: form.ly_do_cho_theo_doi || null,
+            ket_qua_cuoi_cung: form.ket_qua_cuoi_cung || null,
+            tien_do_cap_nhat: timeline,
+            status,
+        }
+
+        const { error } = await supabase.from('an_hanh_chinh').update(payload).eq('id', record.id)
+        setLoading(false)
+
+        if (error) {
+            toast.error(`Lỗi cập nhật: ${error.message}`)
+            return
+        }
+
+        toast.success(`Đã chuyển sang trạng thái "${status === 'WATCHING' ? 'Chờ theo dõi' : 'Án xong'}"`)
+        if (onSuccess) onSuccess()
+        onClose()
     }
 
     const statusBadge = {
@@ -597,47 +629,29 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                             </div>
 
                             {/* 2-column info grid */}
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Người khởi kiện */}
-                                <div className="bg-white rounded-xl border border-amber-100 p-4 space-y-1.5 shadow-sm">
-                                    <div className="flex items-center gap-1.5 mb-2">
-                                        <div className="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center">
-                                            <User className="w-3.5 h-3.5 text-amber-600" />
-                                        </div>
-                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Người khởi kiện</span>
+                            {/* Người khởi kiện (2) */}
+                            <div className="bg-white rounded-xl border border-amber-100 p-4 space-y-1.5 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">2</span>
+                                    <div className="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center shrink-0">
+                                        <User className="w-3.5 h-3.5 text-amber-600" />
                                     </div>
-                                    <EditableField
-                                        label=""
-                                        value={form.nguoi_khoi_kien ?? ''}
-                                        onChange={v => updateField('nguoi_khoi_kien', v)}
-                                        colorClass="bg-amber-50/50 border-amber-100"
-                                        emptyColor="text-amber-300"
-                                    />
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Người khởi kiện</span>
                                 </div>
-
-                                {/* Người phải thi hành */}
-                                <div className="bg-white rounded-xl border border-red-100 p-4 space-y-1.5 shadow-sm">
-                                    <div className="flex items-center gap-1.5 mb-2">
-                                        <div className="w-6 h-6 rounded-md bg-red-50 flex items-center justify-center">
-                                            <Building2 className="w-3.5 h-3.5 text-red-600" />
-                                        </div>
-                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Người phải thi hành</span>
-                                    </div>
-                                    <EditableCombobox
-                                        label=""
-                                        value={form.nguoi_phai_thi_hanh ?? ''}
-                                        onChange={v => updateField('nguoi_phai_thi_hanh', v)}
-                                        options={dmCoQuan}
-                                        colorClass="bg-red-50/50 border-red-100"
-                                        emptyColor="text-red-300"
-                                    />
-                                </div>
+                                <EditableField
+                                    label=""
+                                    value={form.nguoi_khoi_kien ?? ''}
+                                    onChange={v => updateField('nguoi_khoi_kien', v)}
+                                    colorClass="bg-amber-50/50 border-amber-100"
+                                    emptyColor="text-amber-300"
+                                />
                             </div>
 
-                            {/* Các Quyết Định / Bản Án Array Editor */}
+                            {/* Các Quyết Định / Bản Án (3) */}
                             <div className="bg-white rounded-xl border border-blue-100 p-5 space-y-3 shadow-sm">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">3</span>
+                                    <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
                                         <FileText className="w-3.5 h-3.5 text-blue-600" />
                                     </div>
                                     <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Các BẢN ÁN / QUYẾT ĐỊNH (<span className="text-blue-600">{danhSachQuyetDinh.length}</span>)</span>
@@ -693,10 +707,29 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                 </button>
                             </div>
 
+                            {/* Người phải thi hành (4) */}
+                            <div className="bg-white rounded-xl border border-red-100 p-4 space-y-1.5 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">4</span>
+                                    <div className="w-6 h-6 rounded-md bg-red-50 flex items-center justify-center shrink-0">
+                                        <Building2 className="w-3.5 h-3.5 text-red-600" />
+                                    </div>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Người phải thi hành</span>
+                                </div>
+                                <EditableCombobox
+                                    label=""
+                                    value={form.nguoi_phai_thi_hanh ?? ''}
+                                    onChange={v => updateField('nguoi_phai_thi_hanh', v)}
+                                    options={dmCoQuan}
+                                    colorClass="bg-red-50/50 border-red-100"
+                                    emptyColor="text-red-300"
+                                />
+                            </div>
+
                             {/* Nghĩa vụ phải thi hành án */}
                             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
                                 <EditableField
-                                    label="Nghĩa vụ phải Thi hành án"
+                                    label={<span className="flex items-center gap-2"><span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">5</span> <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center shrink-0"><Scale className="w-3.5 h-3.5 text-slate-600" /></div> <span>Nghĩa vụ phải Thi hành án</span></span>}
                                     value={form.nghia_vu_thi_hanh ?? ''}
                                     onChange={v => updateField('nghia_vu_thi_hanh', v)}
                                     multiline
@@ -706,8 +739,9 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                             </div>
                             {/* QĐ buộc thi hành án Array Editor */}
                             <div className="bg-white rounded-xl border border-orange-200 p-5 space-y-3 shadow-sm">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <div className="w-6 h-6 rounded-md bg-orange-50 flex items-center justify-center">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">6</span>
+                                    <div className="w-6 h-6 rounded-md bg-orange-50 flex items-center justify-center shrink-0">
                                         <AlertCircle className="w-3.5 h-3.5 text-orange-600" />
                                     </div>
                                     <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">CÁC QĐ BUỘC THI HÀNH ÁN (<span className="text-orange-600">{danhSachQuyetDinhBuoc.length}</span>)</span>
@@ -763,20 +797,70 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                 </button>
                             </div>
 
-                            {/* Kết quả cuối cùng — always visible */}
+                            {/* 8. Chờ theo dõi */}
                             <div className={cn(
-                                'rounded-xl border p-5 shadow-sm',
+                                'rounded-xl border p-5 shadow-sm space-y-4',
+                                record.status === 'WATCHING' ? 'bg-white border-blue-200' : 'bg-white border-slate-200'
+                            )}>
+                                <div className="flex items-center gap-2">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">8</span>
+                                    <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest">
+                                        Chờ theo dõi
+                                    </h3>
+                                </div>
+                                <EditableField
+                                    label="Lý do chờ theo dõi"
+                                    value={form.ly_do_cho_theo_doi ?? ''}
+                                    onChange={v => updateField('ly_do_cho_theo_doi', v)}
+                                    multiline
+                                    colorClass={record.status === 'WATCHING' ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'}
+                                    emptyColor={record.status === 'WATCHING' ? 'text-blue-400' : 'text-slate-400'}
+                                    emptyLabel="Chưa có dữ liệu"
+                                />
+                                {form.ly_do_cho_theo_doi?.trim() && record.status !== 'WATCHING' && (
+                                    <div className="flex justify-end mt-4">
+                                        <button
+                                            onClick={() => handleMoveToStatus('WATCHING')}
+                                            disabled={loading}
+                                            className="px-6 py-2 text-sm font-bold text-white bg-red-600 border border-red-600 rounded-xl hover:bg-red-700 hover:border-red-700 hover:shadow-[0_8px_20px_-6px_rgba(220,38,38,0.4)] transition-all duration-300 active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                        >
+                                            <ArrowRightCircle className="w-4 h-4" /> Chuyển sang Chờ theo dõi
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 9. Kết quả cuối cùng */}
+                            <div className={cn(
+                                'rounded-xl border p-5 shadow-sm space-y-4',
                                 record.status === 'COMPLETED' ? 'bg-white border-emerald-200' : 'bg-white border-slate-200'
                             )}>
+                                <div className="flex items-center gap-2">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">9</span>
+                                    <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest">
+                                        Kết quả thi hành án
+                                    </h3>
+                                </div>
                                 <EditableField
-                                    label={record.status === 'COMPLETED' ? '✅ Kết quả thi hành' : 'Kết quả thi hành (chưa kết thúc)'}
+                                    label="Chi tiết kết quả"
                                     value={form.ket_qua_cuoi_cung ?? ''}
                                     onChange={v => updateField('ket_qua_cuoi_cung', v)}
                                     multiline
                                     colorClass={record.status === 'COMPLETED' ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}
                                     emptyColor={record.status === 'COMPLETED' ? 'text-emerald-400' : 'text-slate-400'}
-                                    emptyLabel="Chưa có dữ liệu"
+                                    emptyLabel="Chưa kết thúc"
                                 />
+                                {form.ket_qua_cuoi_cung?.trim() && record.status !== 'COMPLETED' && (
+                                    <div className="flex justify-end mt-4">
+                                        <button
+                                            onClick={() => handleMoveToStatus('COMPLETED')}
+                                            disabled={loading}
+                                            className="px-6 py-2 text-sm font-bold text-white bg-emerald-600 border border-emerald-600 rounded-xl hover:bg-emerald-700 hover:border-emerald-700 hover:shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] transition-all duration-300 active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                        >
+                                            <CheckCircle2 className="w-4 h-4" /> Chuyển sang Án xong
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -787,6 +871,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                             {/* Header */}
                             <div className="flex items-center justify-between shrink-0">
                                 <div className="flex items-center gap-2">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">7</span>
                                     <Clock className="w-4 h-4 text-slate-400" />
                                     <h3 className="text-sm font-bold text-slate-600 uppercase tracking-widest">
                                         Quá trình Thi Hành Án

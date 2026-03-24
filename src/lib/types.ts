@@ -13,6 +13,7 @@ export interface AnHanhChinh {
     nghia_vu_thi_hanh: string | null
     quyet_dinh_buoc_thi_hanh: string | null
     status: 'PENDING' | 'WATCHING' | 'COMPLETED'
+    ly_do_cho_theo_doi: string | null
     ket_qua_cuoi_cung: string | null
     tien_do_cap_nhat: TienDoEntry[]
     created_at: string

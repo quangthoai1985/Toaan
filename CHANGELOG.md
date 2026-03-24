@@ -5,6 +5,18 @@ All notable changes to the **Quản Lý Án Hành Chính** project will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-03-24
+
+### Added
+- **UI Nhận diện bằng số:** Đánh số thứ tự (1-7) tại các cột bảng danh sách `AnHanhChinhPage` (với thiết kế vòng tròn nền đỏ, chữ trắng) và trên tiêu đề field ở `AddAnModal`, `DetailModal` để phản ánh đúng logic quy trình luân chuyển án.
+- **Icon mới:** Thêm biểu tượng Cái cân (`Scale`) cho mục "Nghĩa vụ phải Thi hành án" (Số 5).
+- **Mục "Chờ theo dõi" (Số 8):** Bổ sung trường nhập liệu mới `ly_do_cho_theo_doi` trong bảng CSDL `an_hanh_chinh`. Tại `DetailModal`, khi nhập dữ liệu vào ô này sẽ hiển thị nút "Chuyển sang Chờ theo dõi" màu đỏ.
+- **Mục "Kết quả thi hành án" (Số 9):** Tương tự như trên, khi nhập dữ liệu kết quả sẽ tự động hiện ra nút "Chuyển sang Án xong" màu xanh lá.
+
+### Changed
+- **Logic sắp xếp form:** Bố cục lại thứ tự các trường cả trong `AddAnModal` và `DetailModal` (cột bên trái) một cách thống nhất theo chiều dọc: 2 (Người khởi kiện) -> 3 (Số Bản án) -> 4 (Người phải thi hành) -> 5 (Nghĩa vụ thi hành án) -> 6 (QĐ buộc thi hành án).
+- **Layout Detail Modal:** Chuyển phần Quá trình Thi hành án (Số 7) sang cột bên phải (Sidebar Timeline) và các mục thông tin khác vào cột bên trái.
+
 ## [1.2.0] - 2026-03-21
 
 ### Added

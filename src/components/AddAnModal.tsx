@@ -192,85 +192,28 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
                 {/* Body - Scrollable */}
                 <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
                     
-                    {/* Hàng 1: Người khởi kiện & Người phải thi hành */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Người khởi kiện */}
-                        <div className="bg-white rounded-xl border border-amber-100 p-5 space-y-3 shadow-sm">
-                            <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center">
-                                    <User className="w-3.5 h-3.5 text-amber-600" />
-                                </div>
-                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Người khởi kiện <span className="text-red-500">*</span></label>
+                    {/* Mục 2: Người khởi kiện */}
+                    <div className="bg-white rounded-xl border border-amber-100 p-5 space-y-3 shadow-sm">
+                        <div className="flex items-center gap-2">
+                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">2</span>
+                            <div className="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center shrink-0">
+                                <User className="w-3.5 h-3.5 text-amber-600" />
                             </div>
-                            <input
-                                value={form.nguoi_khoi_kien}
-                                onChange={e => updateField('nguoi_khoi_kien', e.target.value)}
-                                placeholder="VD: Nguyễn Văn A..."
-                                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-400 transition-all font-medium"
-                            />
+                            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Người khởi kiện <span className="text-red-500">*</span></label>
                         </div>
-
-                        {/* Người phải thi hành */}
-                        <div className={cn("bg-white rounded-xl border p-5 space-y-3 shadow-sm relative transition-colors", isInvalidCq ? "border-red-400 bg-red-50/10" : "border-red-100")} ref={cqDropdownRef}>
-                            <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-md bg-red-50 flex items-center justify-center">
-                                    <Building2 className="w-3.5 h-3.5 text-red-600" />
-                                </div>
-                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Người phải thi hành <span className="text-red-500">*</span></label>
-                            </div>
-                            
-                            <input
-                                value={searchCq}
-                                onChange={e => {
-                                    setSearchCq(e.target.value)
-                                    updateField('nguoi_phai_thi_hanh', e.target.value)
-                                    setShowCqDropdown(true)
-                                }}
-                                onFocus={() => setShowCqDropdown(true)}
-                                placeholder="Tìm kiếm hoặc nhập tên cơ quan..."
-                                className={cn(
-                                    "w-full bg-slate-50 border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all font-medium",
-                                    isInvalidCq 
-                                        ? "border-red-400 focus:ring-red-200 focus:border-red-500 text-red-700" 
-                                        : "border-slate-200 focus:ring-red-200 focus:border-red-400"
-                                )}
-                            />
-
-                            {isInvalidCq && !showCqDropdown && (
-                                <p className="text-xs text-red-500 font-medium absolute -bottom-5 left-5">⚠️ Bắt buộc chọn từ danh sách</p>
-                            )}
-
-                            {showCqDropdown && (
-                                <div className="absolute left-5 right-5 top-[85px] z-50 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto w-[calc(100%-40px)]">
-                                    {filteredCq.length === 0 ? (
-                                        <div className="p-4 text-sm text-slate-500 italic text-center">Không có sẵn trong danh mục. Giữ nguyên text để nhập tự do.</div>
-                                    ) : (
-                                        <ul className="py-1">
-                                            {filteredCq.map(opt => (
-                                                <li
-                                                    key={opt.id}
-                                                    onClick={() => {
-                                                        setSearchCq(opt.ten_co_quan)
-                                                        updateField('nguoi_phai_thi_hanh', opt.ten_co_quan)
-                                                        setShowCqDropdown(false)
-                                                    }}
-                                                    className="px-4 py-2.5 text-sm text-slate-700 hover:bg-red-50 cursor-pointer border-b border-slate-50 last:border-0"
-                                                >
-                                                    <span className="font-medium">{opt.ten_co_quan}</span>
-                                                    {opt.cap_co_quan && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded ml-2">{opt.cap_co_quan}</span>}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                        <input
+                            value={form.nguoi_khoi_kien}
+                            onChange={e => updateField('nguoi_khoi_kien', e.target.value)}
+                            placeholder="VD: Nguyễn Văn A..."
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-400 transition-all font-medium"
+                        />
                     </div>
 
-                    {/* Hàng 2: Bản án / Quyết định */}
+                    {/* Mục 3: Bản án / Quyết định */}
                     <div className="bg-white rounded-xl border border-blue-100 p-5 space-y-4 shadow-sm">
                         <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
+                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">3</span>
+                            <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
                                 <FileText className="w-3.5 h-3.5 text-blue-600" />
                             </div>
                             <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Các Bản Án / Quyết Định đã có <span className="text-red-500">*</span></span>
@@ -326,10 +269,68 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
                         </button>
                     </div>
 
-                    {/* Hàng 3: Nghĩa vụ thi hành án */}
+                    {/* Mục 4: Người phải thi hành */}
+                    <div className={cn("bg-white rounded-xl border p-5 space-y-3 shadow-sm relative transition-colors", isInvalidCq ? "border-red-400 bg-red-50/10" : "border-red-100")} ref={cqDropdownRef}>
+                        <div className="flex items-center gap-2">
+                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">4</span>
+                            <div className="w-6 h-6 rounded-md bg-red-50 flex items-center justify-center shrink-0">
+                                <Building2 className="w-3.5 h-3.5 text-red-600" />
+                            </div>
+                            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Người phải thi hành <span className="text-red-500">*</span></label>
+                        </div>
+                        
+                        <input
+                            value={searchCq}
+                            onChange={e => {
+                                setSearchCq(e.target.value)
+                                updateField('nguoi_phai_thi_hanh', e.target.value)
+                                setShowCqDropdown(true)
+                            }}
+                            onFocus={() => setShowCqDropdown(true)}
+                            placeholder="Tìm kiếm hoặc nhập tên cơ quan..."
+                            className={cn(
+                                "w-full bg-slate-50 border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all font-medium",
+                                isInvalidCq 
+                                    ? "border-red-400 focus:ring-red-200 focus:border-red-500 text-red-700" 
+                                    : "border-slate-200 focus:ring-red-200 focus:border-red-400"
+                            )}
+                        />
+
+                        {isInvalidCq && !showCqDropdown && (
+                            <p className="text-xs text-red-500 font-medium absolute -bottom-5 left-5">⚠️ Bắt buộc chọn từ danh sách</p>
+                        )}
+
+                        {showCqDropdown && (
+                            <div className="absolute left-5 right-5 top-[85px] z-50 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto w-[calc(100%-40px)]">
+                                {filteredCq.length === 0 ? (
+                                    <div className="p-4 text-sm text-slate-500 italic text-center">Không có sẵn trong danh mục. Giữ nguyên text để nhập tự do.</div>
+                                ) : (
+                                    <ul className="py-1">
+                                        {filteredCq.map(opt => (
+                                            <li
+                                                key={opt.id}
+                                                onClick={() => {
+                                                    setSearchCq(opt.ten_co_quan)
+                                                    updateField('nguoi_phai_thi_hanh', opt.ten_co_quan)
+                                                    setShowCqDropdown(false)
+                                                }}
+                                                className="px-4 py-2.5 text-sm text-slate-700 hover:bg-red-50 cursor-pointer border-b border-slate-50 last:border-0"
+                                            >
+                                                <span className="font-medium">{opt.ten_co_quan}</span>
+                                                {opt.cap_co_quan && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded ml-2">{opt.cap_co_quan}</span>}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Mục 5: Nghĩa vụ thi hành án */}
                     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
                         <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center">
+                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">5</span>
+                            <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center shrink-0">
                                 <Scale className="w-3.5 h-3.5 text-slate-600" />
                             </div>
                             <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nghĩa vụ phải Thi hành án</span>
@@ -343,10 +344,11 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
                         />
                     </div>
 
-                    {/* Hàng 4: Quyết định buộc thi hành án */}
+                    {/* Mục 6: Quyết định buộc thi hành án */}
                     <div className="bg-white rounded-xl border border-orange-200 p-5 space-y-4 shadow-sm">
                         <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-md bg-orange-50 flex items-center justify-center">
+                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">6</span>
+                            <div className="w-6 h-6 rounded-md bg-orange-50 flex items-center justify-center shrink-0">
                                 <AlertCircle className="w-3.5 h-3.5 text-orange-600" />
                             </div>
                             <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Các Quyết Định Buộc Thi Hành Án (Nếu có)</span>

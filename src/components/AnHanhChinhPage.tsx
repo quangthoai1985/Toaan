@@ -386,13 +386,48 @@ export default function AnHanhChinhPage() {
                                         title="Chọn tất cả"
                                     />
                                 </th>
-                                <th className="px-5 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-widest w-[60px] whitespace-nowrap">STT</th>
-                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">Người khởi kiện</th>
-                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">Số Bản án (Quyết Định phải Thi hành án)</th>
-                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">Người phải thi hành</th>
-                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">Nghĩa vụ phải Thi hành án</th>
-                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">QĐ buộc Thi hành án</th>
-                                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[240px]">Quá trình Thi hành án</th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest w-[60px] whitespace-nowrap">
+                                    <div className="flex flex-col items-center justify-center gap-1.5">
+                                        <span>STT</span>
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">1</span>
+                                    </div>
+                                </th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">
+                                    <div className="flex flex-col items-center justify-center gap-1.5">
+                                        <span>Người khởi kiện</span>
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">2</span>
+                                    </div>
+                                </th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">
+                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
+                                        <span>Số Bản án (Quyết Định phải Thi hành án)</span>
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">3</span>
+                                    </div>
+                                </th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">
+                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
+                                        <span>Người phải thi hành</span>
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">4</span>
+                                    </div>
+                                </th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">
+                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
+                                        <span>Nghĩa vụ phải Thi hành án</span>
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">5</span>
+                                    </div>
+                                </th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">
+                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
+                                        <span>QĐ buộc Thi hành án</span>
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">6</span>
+                                    </div>
+                                </th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[240px]">
+                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
+                                        <span>Quá trình Thi hành án</span>
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">7</span>
+                                    </div>
+                                </th>
                                 <th className="px-5 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[220px]">Hành động</th>
                             </tr>
                         </thead>
