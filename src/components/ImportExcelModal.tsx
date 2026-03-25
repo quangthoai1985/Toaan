@@ -42,36 +42,9 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
             const rawData = xlsx.utils.sheet_to_json<any[]>(sheet, { header: 1 })
             const records: Partial<AnHanhChinh>[] = []
             
-            for (let i = 0; i < rawData.length; i++) {
+            for (let i = 3; i < rawData.length; i++) {
                 const row = rawData[i]
                 if (!row || row.length === 0) continue
-
-                // Check if this is a header row by looking at content
-                const sttString = String(row[0] || '').trim().toLowerCase();
-                const col1String = String(row[1] || '').trim().toLowerCase();
-                const col2String = String(row[2] || '').trim().toLowerCase();
-
-                // Skip if it looks like a title or header row (use exact match to avoid skipping real data that contains the word "bản án")
-                if (
-                    sttString === 'stt' || 
-                    sttString.includes('danh sách') ||
-                    col1String === 'người khởi kiện' || 
-                    col1String === 'bản án' ||
-                    col1String === 'số bản án' ||
-                    col2String === 'bản án' ||
-                    col2String === 'số bản án' ||
-                    col2String === 'bị đơn' ||
-                    col2String === 'người bị kiện' ||
-                    col2String === 'người phải thi hành' ||
-                    col2String === 'người phải thi hành án' ||
-                    col2String === 'người phải tha' ||
-                    sttString === '2' || sttString === 'họ tên người khởi kiện. nhiều người: mỗi dòng 1 tên (alt+enter)' ||
-                    col1String.includes('format:') || col1String.includes('nhiều qđ') || col1String.includes('họ tên') ||
-                    col2String.includes('tên cơ quan') || col2String.includes('format') ||
-                    String(row[6] || '').trim().toLowerCase().includes('mỗi mốc tiến độ')
-                ) {
-                    continue;
-                }
                 
                 let nguoiKhoiKien = '';
                 let soBanAn = '';
