@@ -124,7 +124,7 @@ export function parseQTTienDo(text: string): { id: string, date: string, content
                     dateStr = `${y}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
                 }
             } else {
-                dateStr = new Date().toISOString().split('T')[0]
+                dateStr = ''
             }
             
             const content = line.replace(bulletRegex, '').trim()
@@ -144,35 +144,32 @@ export function parseQTTienDo(text: string): { id: string, date: string, content
 
 import { dvhcMapping } from './dvhc_mapping';
 
-/** Chuyển đổi tên Cơ quan/ĐVHC cũ sang mới dựa theo map */
+/** Chuyển đổi tên Cơ quan/ĐVHC cũ sang mới dựa theo map.
+ *  Giữ nguyên tên gốc do người dùng nhập, kèm chú thích tên mới trong ngoặc.
+ *  VD: "UBND huyện Phú Quốc" → "UBND huyện Phú Quốc (Hiện nay là Thành phố Phú Quốc, tỉnh Kiên Giang)"
+ */
 export function mapDVHC(nguoiPhaiThiHanh: string): string {
     if (!nguoiPhaiThiHanh) return nguoiPhaiThiHanh;
     
     let result = nguoiPhaiThiHanh.trim();
     const lowerInput = result.toLowerCase();
     
+    // Nếu đã có chú thích rồi thì bỏ qua
+    if (result.includes('Hiện nay là')) return result;
+    
     // 1. Quét theo cấp Xã/Phường (trong chuỗi 'from')
     for (const mapping of dvhcMapping) {
         if (!mapping.from) continue;
-        // Xóa nội dung trong ngoặc để tránh parse sai (vd: "Xã Thổ Châu (giữ nguyên)")
         const cleanFrom = mapping.from.replace(/\(.*?\)/g, '');
         const fromItems = cleanFrom.split(/[,;]/).map((s: string) => s.trim().toLowerCase()).filter(Boolean);
         
         for (const item of fromItems) {
-            // Loại bỏ các tiền tố không phải tên đơn vị để tránh list tạp
             const cleanItem = item.replace(/^(gồm các xã đảo:|thị trấn|xã|phường)\s+/i, '').trim();
-            if (cleanItem.length < 3) continue; // Tránh match bậy các chữ quá ngắn
+            if (cleanItem.length < 3) continue;
             
-            // Tìm chuỗi item nguyên bản (vd "xã ba chúc") hoặc cleanItem ("ba chúc")
             if (lowerInput.includes(item) || lowerInput.includes(cleanItem)) {
-                // Ưu tiên replace item nguyên bản nếu có, không thì replace cleanItem
-                const matchStr = lowerInput.includes(item) ? item : cleanItem;
-                const regex = new RegExp(matchStr, 'i');
-                // Nếu kết quả đã chứa 'cũ' thì thôi, tránh lặp
-                if (result.includes('(cũ)')) return result;
-                
-                // Trả về định dạng: UBND Xã ABC (Huyện XYZ cũ)
-                return result.replace(regex, mapping.newFullName) + ` (${mapping.oldHuyen})`;
+                // Giữ nguyên tên gốc, thêm chú thích tên mới
+                return `${result} (Hiện nay là ${mapping.newFullName})`;
             }
         }
     }
@@ -182,7 +179,7 @@ export function mapDVHC(nguoiPhaiThiHanh: string): string {
         if (!mapping.oldHuyen) continue;
         const coreHuyenMatch = mapping.oldHuyen.match(/^(.*?),\s*tỉnh/i);
         if (coreHuyenMatch) {
-            const coreHuyen = coreHuyenMatch[1].trim(); // vd "Thành phố Phú Quốc"
+            const coreHuyen = coreHuyenMatch[1].trim();
             if (lowerInput.includes(coreHuyen.toLowerCase())) {
                 const siblings = dvhcMapping.filter((m: any) => m.oldHuyen === mapping.oldHuyen);
                 let bestMapping = mapping;
@@ -192,9 +189,8 @@ export function mapDVHC(nguoiPhaiThiHanh: string): string {
                     if (betterMatch) bestMapping = betterMatch;
                 }
                 
-                const regex = new RegExp(coreHuyen, 'i');
-                if (result.includes('(cũ)')) return result;
-                return result.replace(regex, bestMapping.newFullName) + ` (${bestMapping.oldHuyen})`;
+                // Giữ nguyên tên gốc, thêm chú thích tên mới
+                return `${result} (Hiện nay là ${bestMapping.newFullName})`;
             }
         }
     }

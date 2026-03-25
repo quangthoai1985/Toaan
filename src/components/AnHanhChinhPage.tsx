@@ -340,12 +340,12 @@ export default function AnHanhChinhPage() {
                     </div>
                 ) : (
                     <table className="w-full text-sm border-separate border-spacing-0">
-                        <thead className="bg-red-950 sticky top-0 z-20 shadow-md">
+                        <thead className="bg-slate-50/90 sticky top-0 z-20 shadow-[0_2px_8px_rgba(0,0,0,0.06)] backdrop-blur-sm">
                             <tr>
-                                <th className="px-4 py-4 w-12 text-center border-b border-red-900/50">
+                                <th className="px-3 py-3 w-12 text-center align-middle">
                                     <input
                                         type="checkbox"
-                                        className="w-4 h-4 rounded border-red-800 bg-red-900/20 text-red-500 focus:ring-red-500 cursor-pointer"
+                                        className="w-4 h-4 rounded border-slate-300 bg-white text-red-600 focus:ring-red-500 cursor-pointer"
                                         checked={data.length > 0 && selectedIds.length === data.length}
                                         onChange={(e) => {
                                             if (e.target.checked) setSelectedIds(data.map(d => d.id))
@@ -354,30 +354,28 @@ export default function AnHanhChinhPage() {
                                         title="Chọn tất cả"
                                     />
                                 </th>
-                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest w-[60px] whitespace-nowrap text-center border-b border-red-900/50">STT</th>
-                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[180px] text-center border-b border-red-900/50">Người khởi kiện</th>
-                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Số Bản án (Quyết Định phải Thi hành án)</th>
-                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[180px] text-center border-b border-red-900/50">Người phải thi hành</th>
-                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Nghĩa vụ phải Thi hành án</th>
-                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">QĐ buộc Thi hành án</th>
-                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[240px] text-center border-b border-red-900/50">Quá trình Thi hành án</th>
-                                {activeTab === 'PENDING' && (
-                                    <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Chờ theo dõi</th>
-                                )}
-                                {activeTab === 'COMPLETED' && (
-                                    <>
-                                        <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Chờ theo dõi</th>
-                                        <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Kết quả thi hành án</th>
-                                    </>
-                                )}
-                            </tr>
-                            {/* Horizontal Numbers Row */}
-                            <tr className="bg-red-50/90 border-b border-red-100">
-                                <th className="p-0 border-none h-8"></th>
-                                {[1, 2, 3, 4, 5, 6, 7, ...(activeTab === 'PENDING' ? [8] : []), ...(activeTab === 'COMPLETED' ? [8, 9] : [])].map(num => (
-                                    <th key={num} className="p-0 h-8 relative border-none border-l border-red-200/30 first:border-l-0">
-                                        <div className="flex items-center justify-center w-5 h-5 mx-auto rounded-full bg-red-100 text-red-700 text-[10px] font-black shadow-sm ring-1 ring-red-200">
-                                            {num}
+                                {[
+                                    { num: 1, label: 'STT', minW: 'min-w-[60px]' },
+                                    { num: 2, label: 'Người khởi kiện', minW: 'min-w-[180px]' },
+                                    { num: 3, label: 'Số Bản án (Quyết Định phải Thi hành án)', minW: 'min-w-[200px]' },
+                                    { num: 4, label: 'Người phải thi hành', minW: 'min-w-[180px]' },
+                                    { num: 5, label: 'Nghĩa vụ phải Thi hành án', minW: 'min-w-[200px]' },
+                                    { num: 6, label: 'Quyết Định buộc Thi hành án', minW: 'min-w-[200px]' },
+                                    { num: 7, label: 'Quá trình Thi hành án', minW: 'min-w-[240px]' },
+                                    ...(activeTab === 'PENDING' ? [{ num: 8, label: 'Chờ theo dõi', minW: 'min-w-[200px]' }] : []),
+                                    ...(activeTab === 'COMPLETED' ? [
+                                        { num: 8, label: 'Chờ theo dõi', minW: 'min-w-[200px]' },
+                                        { num: 9, label: 'Kết quả thi hành án', minW: 'min-w-[200px]' },
+                                    ] : []),
+                                ].map(col => (
+                                    <th key={col.num} className={cn('px-1.5 py-2.5 text-center align-middle', col.minW)}>
+                                        <div className="flex flex-col items-center gap-1.5 bg-amber-50 border border-amber-200/70 rounded-xl px-3 py-2.5 shadow-sm hover:shadow-md transition-shadow w-full">
+                                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-700 text-[10px] font-black ring-1 ring-red-200/80 shadow-sm">
+                                                {col.num}
+                                            </span>
+                                            <span className="text-[11px] font-bold text-red-900/80 uppercase tracking-wider leading-tight text-center">
+                                                {col.label}
+                                            </span>
                                         </div>
                                     </th>
                                 ))}
