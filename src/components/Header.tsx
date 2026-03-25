@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Scale, LayoutDashboard, Building2 } from 'lucide-react'
+import { Scale, LayoutDashboard, Building2, BarChart3 } from 'lucide-react'
 
 export default function Header() {
     const pathname = usePathname()
@@ -25,10 +25,22 @@ export default function Header() {
                 {/* Navigation Links */}
                 <div className="flex items-center gap-1.5 ml-6 h-full">
                     <Link 
+                        href="/tong-quan"
+                        className={cn(
+                            "flex items-center gap-2 px-4 h-full border-b-2 text-sm font-semibold transition-colors",
+                            pathname.startsWith('/tong-quan')
+                                ? "border-red-400 text-white bg-white/5" 
+                                : "border-transparent text-red-100/60 hover:text-red-100 hover:bg-white/5"
+                        )}
+                    >
+                        <BarChart3 className="w-4 h-4" />
+                        Tổng Quan
+                    </Link>
+                    <Link 
                         href="/dashboard"
                         className={cn(
                             "flex items-center gap-2 px-4 h-full border-b-2 text-sm font-semibold transition-colors",
-                            pathname.startsWith('/dashboard') || pathname === '/'
+                            pathname.startsWith('/dashboard')
                                 ? "border-red-400 text-white bg-white/5" 
                                 : "border-transparent text-red-100/60 hover:text-red-100 hover:bg-white/5"
                         )}

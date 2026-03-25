@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { X, UploadCloud, Loader2, AlertCircle, FileSpreadsheet, CheckCircle2, FileDown, Eye, ChevronDown } from 'lucide-react'
 import { useToast } from './Toast'
 import * as xlsx from 'xlsx'
-import { cn, parseQuyetDinhList } from '@/lib/utils'
+import { cn, parseQuyetDinhList, parseQTTienDo, mapDVHC } from '@/lib/utils'
 import { AnHanhChinh, TienDoEntry } from '@/lib/types'
 
 interface Props {
@@ -30,41 +30,6 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
     const [selectedSheet, setSelectedSheet] = useState<string>('')
     const [importStatus, setImportStatus] = useState<'PENDING' | 'COMPLETED'>('PENDING')
 
-    function parseQTTienDo(text: string): TienDoEntry[] {
-        if (!text) return []
-        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line !== '')
-        const entries: TienDoEntry[] = []
-        let currentEntry: TienDoEntry | null = null
-        const dateRegex = /(?:Ngày\s+)?(\d{1,2}\/\d{1,2}\/\d{4})/i
-
-        for (let line of lines) {
-            const isNewEntryMatch = line.match(dateRegex)
-            const hasBulletPoint = /^[-+*]/i.test(line)
-            const isNewEntry = isNewEntryMatch || (hasBulletPoint && currentEntry)
-
-            if (isNewEntry || !currentEntry) {
-                if (currentEntry) entries.push(currentEntry)
-                
-                let dateStr = isNewEntryMatch ? isNewEntryMatch[1] : ''
-                if (dateStr) {
-                    const [d, m, y] = dateStr.split('/')
-                    dateStr = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`
-                } else {
-                    dateStr = new Date().toISOString().split('T')[0]
-                }
-                
-                currentEntry = {
-                    id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
-                    date: dateStr,
-                    content: line.replace(/^[-+*]\s*/, '').trim(),
-                }
-            } else {
-                currentEntry.content += '\n' + line
-            }
-        }
-        if (currentEntry) entries.push(currentEntry)
-        return entries
-    }
 
     // Tái xử lý dữ liệu khi Đổi Sheet hoặc Đổi Status
     useEffect(() => {
@@ -118,7 +83,7 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
                     
                     if (!soBanAn && !nguoiKhoiKien) continue;
 
-                    nguoiPhaiThiHanh = row[3]?.toString().trim() || 'Chưa cập nhật';
+                    nguoiPhaiThiHanh = mapDVHC(row[3]?.toString().trim() || 'Chưa cập nhật');
                     nghiaVu = row[4]?.toString().trim() || null;
                     quyetDinh = row[5]?.toString().trim() || null;
 
@@ -126,22 +91,21 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
                     tienDoList = parseQTTienDo(thihanhHistoryText);
                 } else {
                     // COMPLETED Tab Logic
-                    soBanAn = row[1]?.toString().trim() || '';
-                    nguoiPhaiThiHanh = row[2]?.toString().trim() || 'Chưa cập nhật';
+                    nguoiKhoiKien = row[1]?.toString().trim() || '';
+                    soBanAn = row[2]?.toString().trim() || '';
                     
-                    if (!soBanAn && !nguoiPhaiThiHanh) continue;
+                    if (!soBanAn && !nguoiKhoiKien) continue;
 
-                    nghiaVu = row[3]?.toString().trim() || null;
-                    quyetDinh = row[4]?.toString().trim() || null;
+                    nguoiPhaiThiHanh = mapDVHC(row[3]?.toString().trim() || 'Chưa cập nhật');
+                    nghiaVu = row[4]?.toString().trim() || null;
+                    quyetDinh = row[5]?.toString().trim() || null;
                     
-                    const pKetQuaText = row[5]?.toString().trim() || '';
-                    nguoiKhoiKien = row[6]?.toString().trim() || 'Chưa cập nhật';
-
-                    // Bóc tách cột Kết quả thi hành (F) thành mảng lịch sử giống như cột Quá trình thi hành án
-                    tienDoList = parseQTTienDo(pKetQuaText);
+                    const thihanhHistoryText = row[6]?.toString() || '';
+                    tienDoList = parseQTTienDo(thihanhHistoryText);
                     
-                    // Để trống cột Kết quả thi hành theo yêu cầu
-                    ketQua = null;
+                    // Cột I (index 8) chứa thông tin Kết quả thi hành án
+                    // Nếu nhập vào cột H (index 7) thì check ưu tiên cột I trước
+                    ketQua = row[8]?.toString().trim() || row[7]?.toString().trim() || null;
                 }
 
                 const parsedQuyetDinh = soBanAn ? parseQuyetDinhList(soBanAn) : [{
@@ -215,7 +179,7 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
             return
         }
 
-        toast.success(`Đã import thành công ${parsedData.length} dòng dữ liệu vào thẻ ${importStatus === 'PENDING' ? 'Đang thi hành' : 'Án Xong'}!`)
+        toast.success(`Đã import thành công ${parsedData.length} dòng dữ liệu vào thẻ ${importStatus === 'PENDING' ? 'Đang thi hành' : 'Đã thi hành'}!`)
         handleClose()
         onSuccess()
     }
@@ -258,8 +222,8 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
                         </div>
                         <ul className="list-disc list-inside space-y-1.5 ml-1 opacity-90">
                             <li>Dữ liệu sẽ được <strong>tự động nhận diện dòng bắt đầu</strong> (bỏ qua các dòng tiêu đề).</li>
-                            <li><strong>Phần Đang thi hành:</strong> Cột B (Người khởi kiện) | Cột C (Số án) | Cột D (Người bị kiện) | Cột E (Nội dung) | Cột F (QĐ buộc THAHC) | Cột G (Lịch sử THA).</li>
-                            <li><strong>Phần Án xong:</strong> Cột B (Số án) | Cột C (Người bị kiện) | Cột D (Nội dung) | Cột E (QĐ buộc THAHC) | Cột F (Kết quả THA) | Cột G (Người khởi kiện).</li>
+                            <li><strong>Cấu trúc chung:</strong> Cột B (Người khởi kiện) | Cột C (Số án) | Cột D (Bị kiện/Phải THA) | Cột E (Nội dung) | Cột F (QĐ buộc) | Cột G (Quá trình THA).</li>
+                            <li><strong>Phần Đã thi hành:</strong> Có thể nhập Kết quả thi hành án ở Cột I hoặc Cột H.</li>
                             <li>Hệ thống <strong>tự động nhận diện mapping</strong> cột dựa vào cấu hình Trạng thái Import mà bạn chọn ở bên dưới.</li>
                         </ul>
                     </div>
@@ -275,7 +239,7 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
                                     className="w-full appearance-none px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 font-medium focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none transition-all"
                                 >
                                     <option value="PENDING">Đang thi hành (Chưa xong)</option>
-                                    <option value="COMPLETED">Án xong (Đã giải quyết)</option>
+                                    <option value="COMPLETED">Đã thi hành (Đã giải quyết)</option>
                                 </select>
                                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                             </div>
@@ -358,7 +322,7 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
                                     <div key={idx} className="pb-4 border-b border-slate-100 last:border-0 last:pb-0">
                                         <div className="grid grid-cols-[80px_1fr] gap-x-2 gap-y-1.5">
                                             <span className="font-semibold text-slate-600">Trạng thái:</span>
-                                            <span className="font-medium text-emerald-700">{row.status === 'PENDING' ? 'Đang thi hành' : 'Án Xong'}</span>
+                                            <span className="font-medium text-emerald-700">{row.status === 'PENDING' ? 'Đang thi hành' : 'Đã thi hành'}</span>
                                             
                                             <span className="font-semibold text-slate-600">Số án:</span>
                                             <span className="text-slate-800 font-medium">{row.so_ban_an}</span>

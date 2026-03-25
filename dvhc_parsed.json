@@ -1,0 +1,890 @@
+[
+  [
+    "DANH SÁCH 102 ĐƠN VỊ HÀNH CHÍNH CẤP XÃ TỈNH AN GIANG",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Theo Nghị quyết số 1654/NQ-UBTVQH15, hiệu lực từ ngày 16/6/2025  |  Gồm: 85 xã · 14 phường · 03 đặc khu",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "STT",
+    "Loại",
+    "Tên đơn vị",
+    "Tên đầy đủ",
+    "Sáp nhập / Hình thành từ",
+    "Đơn vị hành chính\ncấp huyện (cũ)"
+  ],
+  [
+    "I. PHƯỜNG — 14 phường",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    1,
+    "Phường",
+    "Bình Đức",
+    "Phường Bình Đức",
+    "Phường Bình Đức, Phường Bình Khánh, Xã Mỹ Khánh",
+    "Thành phố Long Xuyên, tỉnh An Giang (cũ)"
+  ],
+  [
+    2,
+    "Phường",
+    "Chi Lăng",
+    "Phường Chi Lăng",
+    "Phường Chi Lăng, Phường Núi Voi, Xã Tân Lợi",
+    "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  ],
+  [
+    3,
+    "Phường",
+    "Châu Đốc",
+    "Phường Châu Đốc",
+    "Phường Vĩnh Ngươn, Phường Châu Phú A, Phường Châu Phú B, Phường Vĩnh Mỹ",
+    "Thành phố Châu Đốc, tỉnh An Giang (cũ)"
+  ],
+  [
+    4,
+    "Phường",
+    "Hà Tiên",
+    "Phường Hà Tiên",
+    "Phường Pháo Đài, Phường Bình San, Phường Mỹ Đức, Phường Đông Hồ",
+    "Thị xã Hà Tiên, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    5,
+    "Phường",
+    "Long Phú",
+    "Phường Long Phú",
+    "Phường Long Hưng, Phường Long Châu, Phường Long Phú",
+    "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  ],
+  [
+    6,
+    "Phường",
+    "Long Xuyên",
+    "Phường Long Xuyên",
+    "Phường Mỹ Bình, Phường Mỹ Long, Phường Mỹ Xuyên, Phường Mỹ Phước, Phường Mỹ Quý, Phường Mỹ Hòa",
+    "Thành phố Long Xuyên, tỉnh An Giang (cũ)"
+  ],
+  [
+    7,
+    "Phường",
+    "Mỹ Thới",
+    "Phường Mỹ Thới",
+    "Phường Mỹ Thạnh, Phường Mỹ Thới",
+    "Thành phố Long Xuyên, tỉnh An Giang (cũ)"
+  ],
+  [
+    8,
+    "Phường",
+    "Rạch Giá",
+    "Phường Rạch Giá",
+    "Phường Vĩnh Quang, Phường Vĩnh Thanh, Phường Vĩnh Thanh Vân, Phường Vĩnh Lạc, Phường An Hòa, Phường Vĩnh Hiệp, Phường An Bình, Phường Rạch Sỏi, Phường Vĩnh Lợi",
+    "Thành phố Rạch Giá, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    9,
+    "Phường",
+    "Thới Sơn",
+    "Phường Thới Sơn",
+    "Phường Nhơn Hưng, Phường Nhà Bàng, Phường Thới Sơn",
+    "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  ],
+  [
+    10,
+    "Phường",
+    "Tân Châu",
+    "Phường Tân Châu",
+    "Phường Long Thạnh, Phường Long Sơn",
+    "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  ],
+  [
+    11,
+    "Phường",
+    "Tô Châu",
+    "Phường Tô Châu",
+    "Phường Tô Châu, Xã Thuận Yên, Xã Dương Hòa",
+    "Thị xã Hà Tiên, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    12,
+    "Phường",
+    "Tịnh Biên",
+    "Phường Tịnh Biên",
+    "Phường An Phú, Phường Tịnh Biên, Xã An Nông",
+    "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  ],
+  [
+    13,
+    "Phường",
+    "Vĩnh Thông",
+    "Phường Vĩnh Thông",
+    "Xã Phi Thông, Phường Vĩnh Thông, Xã Mỹ Lâm",
+    "Thành phố Rạch Giá, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    14,
+    "Phường",
+    "Vĩnh Tế",
+    "Phường Vĩnh Tế",
+    "Phường Núi Sam, Xã Vĩnh Tế, Xã Vĩnh Châu",
+    "Thành phố Châu Đốc, tỉnh An Giang (cũ)"
+  ],
+  [
+    "II. XÃ — 85 xã",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    15,
+    "Xã",
+    "An Biên",
+    "Xã An Biên",
+    "Thị trấn Thứ Ba, Xã Đông Yên, Xã Hưng Yên",
+    "Huyện An Biên, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    16,
+    "Xã",
+    "An Cư",
+    "Xã An Cư",
+    "Xã An Cư, Xã Văn Giáo, Xã Vĩnh Trung",
+    "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  ],
+  [
+    17,
+    "Xã",
+    "An Châu",
+    "Xã An Châu",
+    "Thị trấn An Châu, Xã Hòa Bình Thạnh, Xã Vĩnh Thành",
+    "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  ],
+  [
+    18,
+    "Xã",
+    "An Minh",
+    "Xã An Minh",
+    "Thị trấn Thứ Mười Một, Xã Đông Hưng, Xã Đông Hưng B",
+    "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    19,
+    "Xã",
+    "An Phú",
+    "Xã An Phú",
+    "Thị trấn An Phú, Xã Vĩnh Hội Đông, Xã Phú Hội, Xã Phước Hưng",
+    "Huyện An Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    20,
+    "Xã",
+    "Ba Chúc",
+    "Xã Ba Chúc",
+    "Thị trấn Ba Chúc, Xã Lạc Quới, Xã Lê Trì",
+    "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  ],
+  [
+    21,
+    "Xã",
+    "Bình An",
+    "Xã Bình An",
+    "Xã Bình An (Châu Thành), Xã Vĩnh Hòa Hiệp, Xã Vĩnh Hòa Phú",
+    "Huyện Châu Thành, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    22,
+    "Xã",
+    "Bình Giang",
+    "Xã Bình Giang",
+    "Xã Bình Giang (giữ nguyên)",
+    "Huyện Hòn Đất, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    23,
+    "Xã",
+    "Bình Hòa",
+    "Xã Bình Hòa",
+    "Xã Bình Hòa, Xã Bình Thạnh, Xã An Hòa",
+    "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  ],
+  [
+    24,
+    "Xã",
+    "Bình Mỹ",
+    "Xã Bình Mỹ",
+    "Xã Bình Mỹ, Xã Bình Thủy, Xã Bình Chánh",
+    "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    25,
+    "Xã",
+    "Bình Sơn",
+    "Xã Bình Sơn",
+    "Xã Bình Sơn (giữ nguyên)",
+    "Huyện Hòn Đất, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    26,
+    "Xã",
+    "Bình Thạnh Đông",
+    "Xã Bình Thạnh Đông",
+    "Xã Hiệp Xương, Xã Phú Bình, Xã Bình Thạnh Đông",
+    "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  ],
+  [
+    27,
+    "Xã",
+    "Cần Đăng",
+    "Xã Cần Đăng",
+    "Xã Cần Đăng, Xã Vĩnh Lợi",
+    "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  ],
+  [
+    28,
+    "Xã",
+    "Cô Tô",
+    "Xã Cô Tô",
+    "Thị trấn Cô Tô, Xã Tà Đảnh, Xã Tân Tuyến",
+    "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  ],
+  [
+    29,
+    "Xã",
+    "Cù Lao Giêng",
+    "Xã Cù Lao Giêng",
+    "Xã Tấn Mỹ, Xã Mỹ Hiệp, Xã Bình Phước Xuân",
+    "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  ],
+  [
+    30,
+    "Xã",
+    "Châu Phong",
+    "Xã Châu Phong",
+    "Xã Phú Vĩnh, Xã Lê Chánh, Xã Châu Phong",
+    "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  ],
+  [
+    31,
+    "Xã",
+    "Châu Phú",
+    "Xã Châu Phú",
+    "Thị trấn Cái Dầu, Xã Bình Long, Xã Bình Phú",
+    "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    32,
+    "Xã",
+    "Châu Thành",
+    "Xã Châu Thành",
+    "Thị trấn Minh Lương, Xã Minh Hòa, Xã Giục Tượng",
+    "Huyện Châu Thành, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    33,
+    "Xã",
+    "Chợ Mới",
+    "Xã Chợ Mới",
+    "Thị trấn Chợ Mới, Xã Kiến An, Xã Kiến Thành",
+    "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  ],
+  [
+    34,
+    "Xã",
+    "Chợ Vàm",
+    "Xã Chợ Vàm",
+    "Thị trấn Chợ Vàm, Xã Phú Thạnh, Xã Phú Thành",
+    "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  ],
+  [
+    35,
+    "Xã",
+    "Định Hòa",
+    "Xã Định Hòa",
+    "Xã Thới Quản, Xã Định Hòa, Xã Thủy Liễu",
+    "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    36,
+    "Xã",
+    "Định Mỹ",
+    "Xã Định Mỹ",
+    "Xã Định Thành, Xã Định Mỹ, Xã Vĩnh Phú (Thoại Sơn)",
+    "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  ],
+  [
+    37,
+    "Xã",
+    "Đông Hòa",
+    "Xã Đông Hòa",
+    "Xã Đông Hòa, Xã Đông Thạnh",
+    "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    38,
+    "Xã",
+    "Đông Hưng",
+    "Xã Đông Hưng",
+    "Xã Đông Hưng A, Xã Vân Khánh Đông",
+    "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    39,
+    "Xã",
+    "Đông Thái",
+    "Xã Đông Thái",
+    "Xã Nam Thái, Xã Đông Thái, Xã Nam Thái A",
+    "Huyện An Biên, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    40,
+    "Xã",
+    "Gò Quao",
+    "Xã Gò Quao",
+    "Thị trấn Gò Quao, Xã Vĩnh Phước B, Xã Định An",
+    "Huyện Gò Quao, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    41,
+    "Xã",
+    "Giang Thành",
+    "Xã Giang Thành",
+    "Xã Tân Khánh Hòa, Xã Phú Lợi, Xã Phú Mỹ",
+    "Huyện Giang Thành, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    42,
+    "Xã",
+    "Giồng Riềng",
+    "Xã Giồng Riềng",
+    "Thị trấn Giồng Riềng, Xã Bàn Tân Định, Xã Thạnh Hòa, Xã Bàn Thạch, Xã Thạnh Bình",
+    "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    43,
+    "Xã",
+    "Hòa Điền",
+    "Xã Hòa Điền",
+    "Xã Hòa Điền, Xã Kiên Bình",
+    "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    44,
+    "Xã",
+    "Hòa Hưng",
+    "Xã Hòa Hưng",
+    "Xã Hòa Lợi, Xã Hòa Hưng, Xã Hòa An",
+    "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    45,
+    "Xã",
+    "Hòa Lạc",
+    "Xã Hòa Lạc",
+    "Xã Hòa Lạc, Xã Phú Hiệp",
+    "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  ],
+  [
+    46,
+    "Xã",
+    "Hòa Thuận",
+    "Xã Hòa Thuận",
+    "Xã Hòa Thuận, Xã Ngọc Hòa",
+    "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    47,
+    "Xã",
+    "Hòn Đất",
+    "Xã Hòn Đất",
+    "Thị trấn Hòn Đất, Xã Lình Huỳnh, Xã Thổ Sơn, Xã Nam Thái Sơn",
+    "Huyện Hòn Đất, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    48,
+    "Xã",
+    "Hòn Nghệ",
+    "Xã Hòn Nghệ",
+    "Xã Hòn Nghệ (giữ nguyên)",
+    "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    49,
+    "Xã",
+    "Hội An",
+    "Xã Hội An",
+    "Thị trấn Hội An, Xã Hòa Bình, Xã Hòa An",
+    "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  ],
+  [
+    50,
+    "Xã",
+    "Kiên Lương",
+    "Xã Kiên Lương",
+    "Thị trấn Kiên Lương, Xã Bình An (Kiên Lương), Xã Bình Trị",
+    "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    51,
+    "Xã",
+    "Khánh Bình",
+    "Xã Khánh Bình",
+    "Thị trấn Long Bình, Xã Khánh An, Xã Khánh Bình",
+    "Huyện An Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    52,
+    "Xã",
+    "Long Điền",
+    "Xã Long Điền",
+    "Thị trấn Mỹ Luông, Xã Long Điền A, Xã Long Điền B",
+    "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  ],
+  [
+    53,
+    "Xã",
+    "Long Kiến",
+    "Xã Long Kiến",
+    "Xã Long Kiến, Xã An Thạnh Trung, Xã Mỹ An",
+    "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  ],
+  [
+    54,
+    "Xã",
+    "Long Thạnh",
+    "Xã Long Thạnh",
+    "Xã Long Thạnh, Xã Vĩnh Phú (Giồng Riềng), Xã Vĩnh Thạnh",
+    "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    55,
+    "Xã",
+    "Mỹ Đức",
+    "Xã Mỹ Đức",
+    "Xã Mỹ Đức, Xã Khánh Hòa",
+    "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    56,
+    "Xã",
+    "Mỹ Hòa Hưng",
+    "Xã Mỹ Hòa Hưng",
+    "Xã Mỹ Hòa Hưng (giữ nguyên)",
+    "Thành phố Long Xuyên, tỉnh An Giang (cũ)"
+  ],
+  [
+    57,
+    "Xã",
+    "Mỹ Thuận",
+    "Xã Mỹ Thuận",
+    "Thị trấn Sóc Sơn, Xã Mỹ Hiệp Sơn, Xã Mỹ Thuận, Xã Mỹ Phước",
+    "Huyện Hòn Đất, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    58,
+    "Xã",
+    "Núi Cấm",
+    "Xã Núi Cấm",
+    "Xã Tân Lập, Xã An Hảo",
+    "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  ],
+  [
+    59,
+    "Xã",
+    "Ngọc Chúc",
+    "Xã Ngọc Chúc",
+    "Xã Ngọc Chúc, Xã Ngọc Thuận, Xã Ngọc Thành",
+    "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    60,
+    "Xã",
+    "Nhơn Hội",
+    "Xã Nhơn Hội",
+    "Xã Nhơn Hội, Xã Quốc Thái",
+    "Huyện An Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    61,
+    "Xã",
+    "Nhơn Mỹ",
+    "Xã Nhơn Mỹ",
+    "Xã Nhơn Mỹ, Xã Mỹ Hội Đông, Xã Long Giang",
+    "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  ],
+  [
+    62,
+    "Xã",
+    "Óc Eo",
+    "Xã Óc Eo",
+    "Xã Vọng Thê, Xã Vọng Đông, Thị trấn Óc Eo",
+    "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  ],
+  [
+    63,
+    "Xã",
+    "Ô Lâm",
+    "Xã Ô Lâm",
+    "Xã An Tức, Xã Lương Phi, Xã Ô Lâm",
+    "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  ],
+  [
+    64,
+    "Xã",
+    "Phú An",
+    "Xã Phú An",
+    "Xã Phú Thọ, Xã Phú Xuân, Xã Phú An",
+    "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  ],
+  [
+    65,
+    "Xã",
+    "Phú Hòa",
+    "Xã Phú Hòa",
+    "Xã Phú Thuận, Xã Vĩnh Chánh, Thị trấn Phú Hòa",
+    "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  ],
+  [
+    66,
+    "Xã",
+    "Phú Hữu",
+    "Xã Phú Hữu",
+    "Xã Phú Hữu, Xã Vĩnh Lộc",
+    "Huyện An Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    67,
+    "Xã",
+    "Phú Lâm",
+    "Xã Phú Lâm",
+    "Xã Long Hòa, Xã Phú Lâm, Xã Phú Long",
+    "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  ],
+  [
+    68,
+    "Xã",
+    "Phú Tân",
+    "Xã Phú Tân",
+    "Thị trấn Phú Mỹ, Xã Tân Trung, Xã Tân Hòa, Xã Phú Hưng",
+    "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  ],
+  [
+    69,
+    "Xã",
+    "Sơn Hải",
+    "Xã Sơn Hải",
+    "Xã Sơn Hải (giữ nguyên)",
+    "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    70,
+    "Xã",
+    "Sơn Kiên",
+    "Xã Sơn Kiên",
+    "Xã Sơn Kiên, Xã Sơn Bình, Xã Mỹ Thái",
+    "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    71,
+    "Xã",
+    "Tân An",
+    "Xã Tân An",
+    "Xã Tân Thạnh (Tân Châu), Xã Tân An (Tân Châu), Xã Long An",
+    "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  ],
+  [
+    72,
+    "Xã",
+    "Tân Hiệp",
+    "Xã Tân Hiệp",
+    "Thị trấn Tân Hiệp, Xã Tân Hiệp B, Xã Thạnh Đông B, Xã Thạnh Đông",
+    "Huyện Tân Hiệp, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    73,
+    "Xã",
+    "Tân Hội",
+    "Xã Tân Hội",
+    "Xã Tân Thành, Xã Tân Hội, Xã Tân An (Tân Hiệp), Xã Tân Hòa",
+    "Huyện Tân Hiệp, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    74,
+    "Xã",
+    "Tân Thạnh",
+    "Xã Tân Thạnh",
+    "Xã Tân Thạnh (An Minh), Xã Thuận Hòa",
+    "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    75,
+    "Xã",
+    "Tây Phú",
+    "Xã Tây Phú",
+    "Xã An Bình, Xã Tây Phú, Xã Mỹ Phú Đông",
+    "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  ],
+  [
+    76,
+    "Xã",
+    "Tây Yên",
+    "Xã Tây Yên",
+    "Xã Tây Yên, Xã Tây Yên A, Xã Nam Yên",
+    "Huyện An Biên, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    77,
+    "Xã",
+    "Tiên Hải",
+    "Xã Tiên Hải",
+    "Xã Tiên Hải (giữ nguyên)",
+    "Thị xã Hà Tiên, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    78,
+    "Xã",
+    "Thạnh Đông",
+    "Xã Thạnh Đông",
+    "Xã Tân Hiệp A, Xã Thạnh Đông A, Xã Thạnh Trị",
+    "Huyện Tân Hiệp, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    79,
+    "Xã",
+    "Thạnh Hưng",
+    "Xã Thạnh Hưng",
+    "Xã Thạnh Hưng, Xã Thạnh Phước, Xã Thạnh Lộc (Châu Thành)",
+    "Huyện Châu Thành, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    80,
+    "Xã",
+    "Thạnh Lộc",
+    "Xã Thạnh Lộc",
+    "Xã Thạnh Lộc (Giồng Riềng), Xã Mong Thọ A, Xã Mong Thọ, Xã Mong Thọ B",
+    "Huyện Giồng Riềng & Huyện Châu Thành, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    81,
+    "Xã",
+    "Thạnh Mỹ Tây",
+    "Xã Thạnh Mỹ Tây",
+    "Xã Thạnh Mỹ Tây, Xã Đào Hữu Cảnh, Xã Ô Long Vỹ",
+    "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    82,
+    "Xã",
+    "Thoại Sơn",
+    "Xã Thoại Sơn",
+    "Xã Thoại Giang, Xã Bình Thành, Thị trấn Núi Sập",
+    "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  ],
+  [
+    83,
+    "Xã",
+    "Tri Tôn",
+    "Xã Tri Tôn",
+    "Xã Núi Tô, Xã Châu Lăng, Thị trấn Tri Tôn",
+    "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  ],
+  [
+    84,
+    "Xã",
+    "U Minh Thượng",
+    "Xã U Minh Thượng",
+    "Xã An Minh Bắc, Xã Minh Thuận",
+    "Huyện U Minh Thượng, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    85,
+    "Xã",
+    "Vân Khánh",
+    "Xã Vân Khánh",
+    "Xã Vân Khánh, Xã Vân Khánh Tây",
+    "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    86,
+    "Xã",
+    "Vĩnh An",
+    "Xã Vĩnh An",
+    "Thị trấn Vĩnh Bình, Xã Vĩnh An, Xã Tân Phú",
+    "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  ],
+  [
+    87,
+    "Xã",
+    "Vĩnh Bình",
+    "Xã Vĩnh Bình",
+    "Xã Vĩnh Bình Bắc, Xã Vĩnh Bình Nam, Xã Bình Minh",
+    "Huyện Gò Quao, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    88,
+    "Xã",
+    "Vĩnh Điều",
+    "Xã Vĩnh Điều",
+    "Xã Vĩnh Điều, Xã Vĩnh Phú (Giang Thành)",
+    "Huyện Giang Thành, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    89,
+    "Xã",
+    "Vĩnh Gia",
+    "Xã Vĩnh Gia",
+    "Xã Vĩnh Gia, Xã Vĩnh Phước, Xã Lương An Trà",
+    "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  ],
+  [
+    90,
+    "Xã",
+    "Vĩnh Hanh",
+    "Xã Vĩnh Hanh",
+    "Xã Vĩnh Hanh, Xã Vĩnh Nhuận",
+    "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  ],
+  [
+    91,
+    "Xã",
+    "Vĩnh Hậu",
+    "Xã Vĩnh Hậu",
+    "Thị trấn Đa Phước, Xã Vĩnh Trường, Xã Vĩnh Hậu",
+    "Huyện An Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    92,
+    "Xã",
+    "Vĩnh Hòa",
+    "Xã Vĩnh Hòa",
+    "Xã Thạnh Yên A, Xã Hòa Chánh, Xã Vĩnh Hòa (U Minh Thượng), Xã Thạnh Yên",
+    "Huyện U Minh Thượng, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    93,
+    "Xã",
+    "Vĩnh Hòa Hưng",
+    "Xã Vĩnh Hòa Hưng",
+    "Xã Vĩnh Hòa Hưng Bắc, Xã Vĩnh Hòa Hưng Nam",
+    "Huyện Gò Quao, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    94,
+    "Xã",
+    "Vĩnh Phong",
+    "Xã Vĩnh Phong",
+    "Thị trấn Vĩnh Thuận, Xã Vĩnh Phong, Xã Phong Đông",
+    "Huyện Vĩnh Thuận, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    95,
+    "Xã",
+    "Vĩnh Tuy",
+    "Xã Vĩnh Tuy",
+    "Xã Vĩnh Thắng, Xã Vĩnh Tuy, Xã Vĩnh Phước A",
+    "Huyện Gò Quao, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    96,
+    "Xã",
+    "Vĩnh Thạnh Trung",
+    "Xã Vĩnh Thạnh Trung",
+    "Xã Mỹ Phú, Thị trấn Vĩnh Thạnh Trung",
+    "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  ],
+  [
+    97,
+    "Xã",
+    "Vĩnh Thuận",
+    "Xã Vĩnh Thuận",
+    "Xã Vĩnh Thuận, Xã Tân Thuận",
+    "Huyện Vĩnh Thuận, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    98,
+    "Xã",
+    "Vĩnh Trạch",
+    "Xã Vĩnh Trạch",
+    "Xã Vĩnh Khánh, Xã Vĩnh Trạch",
+    "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  ],
+  [
+    99,
+    "Xã",
+    "Vĩnh Xương",
+    "Xã Vĩnh Xương",
+    "Xã Phú Lộc, Xã Vĩnh Xương, Xã Vĩnh Hòa (Tân Châu)",
+    "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  ],
+  [
+    "III. ĐẶC KHU — 3 đặc khu (mô hình đặc thù duy nhất tại Việt Nam)",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    100,
+    "Đặc khu",
+    "Kiên Hải",
+    "Đặc khu Kiên Hải",
+    "Gồm các xã đảo: An Sơn, Lại Sơn, Hòn Tre, Nam Du",
+    "Huyện Kiên Hải, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    101,
+    "Đặc khu",
+    "Phú Quốc",
+    "Đặc khu Phú Quốc",
+    "Phường Dương Đông, Phường An Thới, Xã Dương Tơ, Xã Hàm Ninh, Xã Cửa Dương, Xã Cửa Cạn, Xã Gành Dầu, Xã Bãi Thơm",
+    "Thành phố Phú Quốc, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    102,
+    "Đặc khu",
+    "Thổ Châu",
+    "Đặc khu Thổ Châu",
+    "Xã Thổ Châu (giữ nguyên — quần đảo Thổ Chu)",
+    "Thành phố Phú Quốc, tỉnh Kiên Giang (cũ)"
+  ],
+  [
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Tổng cộng: 102 đơn vị hành chính cấp xã  |  Nguồn: Nghị quyết 1654/NQ-UBTVQH15 ngày 16/6/2025",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ]
+]

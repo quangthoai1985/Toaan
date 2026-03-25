@@ -1,0 +1,410 @@
+[
+  {
+    "newFullName": "Phường Bình Đức",
+    "oldHuyen": "Thành phố Long Xuyên, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Chi Lăng",
+    "oldHuyen": "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Châu Đốc",
+    "oldHuyen": "Thành phố Châu Đốc, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Hà Tiên",
+    "oldHuyen": "Thị xã Hà Tiên, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Long Phú",
+    "oldHuyen": "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Long Xuyên",
+    "oldHuyen": "Thành phố Long Xuyên, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Mỹ Thới",
+    "oldHuyen": "Thành phố Long Xuyên, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Rạch Giá",
+    "oldHuyen": "Thành phố Rạch Giá, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Thới Sơn",
+    "oldHuyen": "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Tân Châu",
+    "oldHuyen": "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Tô Châu",
+    "oldHuyen": "Thị xã Hà Tiên, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Tịnh Biên",
+    "oldHuyen": "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Vĩnh Thông",
+    "oldHuyen": "Thành phố Rạch Giá, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Phường Vĩnh Tế",
+    "oldHuyen": "Thành phố Châu Đốc, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã An Biên",
+    "oldHuyen": "Huyện An Biên, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã An Cư",
+    "oldHuyen": "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã An Châu",
+    "oldHuyen": "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã An Minh",
+    "oldHuyen": "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã An Phú",
+    "oldHuyen": "Huyện An Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Ba Chúc",
+    "oldHuyen": "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Bình An",
+    "oldHuyen": "Huyện Châu Thành, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Bình Giang",
+    "oldHuyen": "Huyện Hòn Đất, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Bình Hòa",
+    "oldHuyen": "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Bình Mỹ",
+    "oldHuyen": "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Bình Sơn",
+    "oldHuyen": "Huyện Hòn Đất, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Bình Thạnh Đông",
+    "oldHuyen": "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Cần Đăng",
+    "oldHuyen": "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Cô Tô",
+    "oldHuyen": "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Cù Lao Giêng",
+    "oldHuyen": "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Châu Phong",
+    "oldHuyen": "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Châu Phú",
+    "oldHuyen": "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Châu Thành",
+    "oldHuyen": "Huyện Châu Thành, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Chợ Mới",
+    "oldHuyen": "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Chợ Vàm",
+    "oldHuyen": "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Định Hòa",
+    "oldHuyen": "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Định Mỹ",
+    "oldHuyen": "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Đông Hòa",
+    "oldHuyen": "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Đông Hưng",
+    "oldHuyen": "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Đông Thái",
+    "oldHuyen": "Huyện An Biên, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Gò Quao",
+    "oldHuyen": "Huyện Gò Quao, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Giang Thành",
+    "oldHuyen": "Huyện Giang Thành, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Giồng Riềng",
+    "oldHuyen": "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Hòa Điền",
+    "oldHuyen": "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Hòa Hưng",
+    "oldHuyen": "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Hòa Lạc",
+    "oldHuyen": "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Hòa Thuận",
+    "oldHuyen": "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Hòn Đất",
+    "oldHuyen": "Huyện Hòn Đất, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Hòn Nghệ",
+    "oldHuyen": "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Hội An",
+    "oldHuyen": "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Kiên Lương",
+    "oldHuyen": "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Khánh Bình",
+    "oldHuyen": "Huyện An Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Long Điền",
+    "oldHuyen": "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Long Kiến",
+    "oldHuyen": "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Long Thạnh",
+    "oldHuyen": "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Mỹ Đức",
+    "oldHuyen": "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Mỹ Hòa Hưng",
+    "oldHuyen": "Thành phố Long Xuyên, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Mỹ Thuận",
+    "oldHuyen": "Huyện Hòn Đất, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Núi Cấm",
+    "oldHuyen": "Thị xã Tịnh Biên, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Ngọc Chúc",
+    "oldHuyen": "Huyện Giồng Riềng, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Nhơn Hội",
+    "oldHuyen": "Huyện An Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Nhơn Mỹ",
+    "oldHuyen": "Huyện Chợ Mới, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Óc Eo",
+    "oldHuyen": "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Ô Lâm",
+    "oldHuyen": "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Phú An",
+    "oldHuyen": "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Phú Hòa",
+    "oldHuyen": "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Phú Hữu",
+    "oldHuyen": "Huyện An Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Phú Lâm",
+    "oldHuyen": "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Phú Tân",
+    "oldHuyen": "Huyện Phú Tân, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Sơn Hải",
+    "oldHuyen": "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Sơn Kiên",
+    "oldHuyen": "Huyện Kiên Lương, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Tân An",
+    "oldHuyen": "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Tân Hiệp",
+    "oldHuyen": "Huyện Tân Hiệp, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Tân Hội",
+    "oldHuyen": "Huyện Tân Hiệp, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Tân Thạnh",
+    "oldHuyen": "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Tây Phú",
+    "oldHuyen": "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Tây Yên",
+    "oldHuyen": "Huyện An Biên, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Tiên Hải",
+    "oldHuyen": "Thị xã Hà Tiên, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Thạnh Đông",
+    "oldHuyen": "Huyện Tân Hiệp, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Thạnh Hưng",
+    "oldHuyen": "Huyện Châu Thành, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Thạnh Lộc",
+    "oldHuyen": "Huyện Giồng Riềng & Huyện Châu Thành, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Thạnh Mỹ Tây",
+    "oldHuyen": "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Thoại Sơn",
+    "oldHuyen": "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Tri Tôn",
+    "oldHuyen": "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã U Minh Thượng",
+    "oldHuyen": "Huyện U Minh Thượng, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vân Khánh",
+    "oldHuyen": "Huyện An Minh, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh An",
+    "oldHuyen": "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Bình",
+    "oldHuyen": "Huyện Gò Quao, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Điều",
+    "oldHuyen": "Huyện Giang Thành, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Gia",
+    "oldHuyen": "Huyện Tri Tôn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Hanh",
+    "oldHuyen": "Huyện Châu Thành, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Hậu",
+    "oldHuyen": "Huyện An Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Hòa",
+    "oldHuyen": "Huyện U Minh Thượng, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Hòa Hưng",
+    "oldHuyen": "Huyện Gò Quao, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Phong",
+    "oldHuyen": "Huyện Vĩnh Thuận, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Tuy",
+    "oldHuyen": "Huyện Gò Quao, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Thạnh Trung",
+    "oldHuyen": "Huyện Châu Phú, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Thuận",
+    "oldHuyen": "Huyện Vĩnh Thuận, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Trạch",
+    "oldHuyen": "Huyện Thoại Sơn, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Xã Vĩnh Xương",
+    "oldHuyen": "Thị xã Tân Châu, tỉnh An Giang (cũ)"
+  },
+  {
+    "newFullName": "Đặc khu Kiên Hải",
+    "oldHuyen": "Huyện Kiên Hải, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Đặc khu Phú Quốc",
+    "oldHuyen": "Thành phố Phú Quốc, tỉnh Kiên Giang (cũ)"
+  },
+  {
+    "newFullName": "Đặc khu Thổ Châu",
+    "oldHuyen": "Thành phố Phú Quốc, tỉnh Kiên Giang (cũ)"
+  }
+]

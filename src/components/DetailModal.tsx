@@ -6,11 +6,12 @@ import { AnHanhChinh, TienDoEntry, QuyetDinhEntry } from '@/lib/types'
 import {
     X, FileText, Calendar, User, Building2, Scale, Clock,
     Pencil, Loader2, Save, Plus, Trash2, ChevronDown, ChevronUp,
-    CheckCircle2, AlertCircle, Eye, EyeOff, ArrowRightCircle
+    CheckCircle2, AlertCircle, Eye, EyeOff, ArrowRightCircle, Undo2
 } from 'lucide-react'
-import { cn, formatQuyetDinh } from '@/lib/utils'
+import { cn, formatQuyetDinh, parseQTTienDo } from '@/lib/utils'
 import { useToast } from './Toast'
-import DateInput from './DateInput' // Added DateInput import
+import DateInput from './DateInput'
+import ConfirmModal from './ConfirmModal'
 
 interface Props {
     open: boolean
@@ -30,39 +31,7 @@ function todayISO(): string {
     return new Date().toISOString().split('T')[0]
 }
 
-function parseQTTienDo(text: string): TienDoEntry[] {
-    if (!text) return []
-    const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line !== '')
-    const entries: TienDoEntry[] = []
-    let currentEntry: TienDoEntry | null = null
-    const dateRegex = /(?:Ngày\s+)?(\d{1,2}\/\d{1,2}\/\d{4})/i
 
-    for (const line of lines) {
-        const isNewEntryMatch = line.match(dateRegex)
-        const hasBulletPoint = /^[-+*]/i.test(line)
-        const isNewEntry = isNewEntryMatch || (hasBulletPoint && currentEntry)
-
-        if (isNewEntry || !currentEntry) {
-            if (currentEntry) entries.push(currentEntry)
-            let dateStr = isNewEntryMatch ? isNewEntryMatch[1] : ''
-            if (dateStr) {
-                const [d, mo, y] = dateStr.split('/')
-                dateStr = `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`
-            } else {
-                dateStr = todayISO()
-            }
-            currentEntry = {
-                id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
-                date: dateStr,
-                content: line.replace(/^[-+*]\s*/, '').trim(),
-            }
-        } else {
-            currentEntry.content += '\n' + line
-        }
-    }
-    if (currentEntry) entries.push(currentEntry)
-    return entries
-}
 
 function sortByDateDesc(entries: TienDoEntry[]): TienDoEntry[] {
     return [...entries].sort((a, b) => {
@@ -91,18 +60,13 @@ function EditableField({
         <div className="space-y-1.5">
             <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
-                <button
-                    onClick={() => setEditing(e => !e)}
-                    className="flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                >
-                    {editing ? <><EyeOff className="w-3 h-3" />Xem</> : <><Pencil className="w-3 h-3" />Sửa</>}
-                </button>
             </div>
             {editing ? (
                 multiline ? (
                     <textarea
                         value={value}
                         onChange={e => onChange(e.target.value)}
+                        onBlur={() => setEditing(false)}
                         className="w-full bg-white border border-blue-300 rounded-lg px-3 py-2 text-sm text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-100 min-h-[90px] resize-none"
                         autoFocus
                     />
@@ -110,12 +74,16 @@ function EditableField({
                     <input
                         value={value}
                         onChange={e => onChange(e.target.value)}
+                        onBlur={() => setEditing(false)}
                         className="w-full bg-white border border-blue-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-100"
                         autoFocus
                     />
                 )
             ) : (
-                <div className={cn('rounded-lg px-3 py-2.5 text-sm leading-relaxed border min-h-[40px]', colorClass)}>
+                <div 
+                    onClick={() => setEditing(true)}
+                    className={cn('rounded-lg px-3 py-2.5 text-sm leading-relaxed border min-h-[40px] cursor-text hover:border-blue-300 transition-colors', colorClass)}
+                >
                     {value ? (
                         <span className="text-slate-800 whitespace-pre-wrap">{value}</span>
                     ) : (
@@ -158,6 +126,7 @@ function EditableCombobox({
         function handleClickOutside(event: MouseEvent) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
                 setIsOpen(false)
+                setEditing(false)
             }
         }
         document.addEventListener('mousedown', handleClickOutside)
@@ -170,12 +139,6 @@ function EditableCombobox({
         <div className="space-y-1.5" ref={wrapperRef}>
             <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
-                <button
-                    onClick={() => setEditing(e => !e)}
-                    className="flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                >
-                    {editing ? <><EyeOff className="w-3 h-3" />Đóng</> : <><Pencil className="w-3 h-3" />Sửa</>}
-                </button>
             </div>
             {editing ? (
                 <div className="relative">
@@ -224,7 +187,10 @@ function EditableCombobox({
                     )}
                 </div>
             ) : (
-                <div className={cn('rounded-lg px-3 py-2.5 text-sm leading-relaxed border min-h-[40px]', colorClass)}>
+                <div 
+                    onClick={() => setEditing(true)}
+                    className={cn('rounded-lg px-3 py-2.5 text-sm leading-relaxed border min-h-[40px] cursor-text hover:border-blue-300 transition-colors', colorClass)}
+                >
                     {value ? (
                         <span className="text-slate-800 whitespace-pre-wrap">{value}</span>
                     ) : (
@@ -322,6 +288,12 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
     const [originalDanhSachQuyetDinh, setOriginalDanhSachQuyetDinh] = useState<QuyetDinhEntry[]>([])
     const [danhSachQuyetDinhBuoc, setDanhSachQuyetDinhBuoc] = useState<QuyetDinhEntry[]>([])
     const [originalDanhSachQuyetDinhBuoc, setOriginalDanhSachQuyetDinhBuoc] = useState<QuyetDinhEntry[]>([])
+    const [danhSachQuyetDinhKetQua, setDanhSachQuyetDinhKetQua] = useState<QuyetDinhEntry[]>([])
+    const [originalDanhSachQuyetDinhKetQua, setOriginalDanhSachQuyetDinhKetQua] = useState<QuyetDinhEntry[]>([])
+    const [ketQuaKetThucText, setKetQuaKetThucText] = useState('')
+    const [originalKetQuaKetThucText, setOriginalKetQuaKetThucText] = useState('')
+    const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
+
     const [timeline, setTimeline] = useState<TienDoEntry[]>([])
     const [originalTimeline, setOriginalTimeline] = useState<TienDoEntry[]>([])
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
@@ -346,7 +318,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                 nghia_vu_thi_hanh: record.nghia_vu_thi_hanh ?? '',
                 quyet_dinh_buoc_thi_hanh: record.quyet_dinh_buoc_thi_hanh ?? '',
                 ly_do_cho_theo_doi: record.ly_do_cho_theo_doi ?? '',
-                ket_qua_cuoi_cung: record.ket_qua_cuoi_cung ?? '',
+                // ket_qua_cuoi_cung is now handled separately
             })
             const tl = Array.isArray(record.tien_do_cap_nhat) ? record.tien_do_cap_nhat : []
             setTimeline(sortByDateDesc(tl))
@@ -423,6 +395,36 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             }
             setDanhSachQuyetDinhBuoc(parsedQDBuoc)
             setOriginalDanhSachQuyetDinhBuoc(JSON.parse(JSON.stringify(parsedQDBuoc)))
+
+            let parsedKQText = '';
+            let parsedKQQD: QuyetDinhEntry[] = [];
+            if (record.ket_qua_cuoi_cung) {
+                try {
+                    const parsed = JSON.parse(record.ket_qua_cuoi_cung);
+                    if (Array.isArray(parsed)) {
+                        parsedKQQD = parsed;
+                    } else if (typeof parsed === 'object' && parsed !== null) {
+                        parsedKQText = parsed.text || '';
+                        parsedKQQD = parsed.quyet_dinh || [];
+                    } else {
+                        parsedKQText = record.ket_qua_cuoi_cung;
+                    }
+                } catch {
+                    parsedKQText = record.ket_qua_cuoi_cung;
+                }
+            }
+            if (parsedKQQD.length === 0) {
+                parsedKQQD = [{
+                    id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+                    so_quyet_dinh: '',
+                    ngay_ban_hanh: '',
+                    co_quan_ban_hanh: ''
+                }];
+            }
+            setKetQuaKetThucText(parsedKQText);
+            setOriginalKetQuaKetThucText(parsedKQText);
+            setDanhSachQuyetDinhKetQua(parsedKQQD);
+            setOriginalDanhSachQuyetDinhKetQua(JSON.parse(JSON.stringify(parsedKQQD)));
         }
     }, [open, record])
 
@@ -488,22 +490,54 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
         setDanhSachQuyetDinhBuoc(prev => prev.filter(qd => qd.id !== id))
     }
 
+    const updateQuyetDinhKetQua = (id: string, field: keyof QuyetDinhEntry, value: string) => {
+        setDanhSachQuyetDinhKetQua(prev => prev.map(qd => qd.id === id ? { ...qd, [field]: value } : qd))
+    }
+    const addQuyetDinhKetQua = () => {
+        setDanhSachQuyetDinhKetQua(prev => [...prev, {
+            id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
+            so_quyet_dinh: '',
+            ngay_ban_hanh: '',
+            co_quan_ban_hanh: ''
+        }])
+    }
+    const removeQuyetDinhKetQua = (id: string) => {
+        setDanhSachQuyetDinhKetQua(prev => prev.filter(qd => qd.id !== id))
+    }
+
     const hasChanges = () => {
         if (!record) return false
         const formChanged =
             (form.nguoi_khoi_kien ?? '') !== (record.nguoi_khoi_kien ?? '') ||
             (form.nguoi_phai_thi_hanh ?? '') !== (record.nguoi_phai_thi_hanh ?? '') ||
             (form.nghia_vu_thi_hanh ?? '') !== (record.nghia_vu_thi_hanh ?? '') ||
-            (form.ly_do_cho_theo_doi ?? '') !== (record.ly_do_cho_theo_doi ?? '') ||
-            (form.ket_qua_cuoi_cung ?? '') !== (record.ket_qua_cuoi_cung ?? '')
+            (form.ly_do_cho_theo_doi ?? '') !== (record.ly_do_cho_theo_doi ?? '')
         const tlChanged = JSON.stringify(timeline) !== JSON.stringify(originalTimeline)
         const qdChanged = JSON.stringify(danhSachQuyetDinh) !== JSON.stringify(originalDanhSachQuyetDinh)
         const qdBuocChanged = JSON.stringify(danhSachQuyetDinhBuoc) !== JSON.stringify(originalDanhSachQuyetDinhBuoc)
-        return formChanged || tlChanged || qdChanged || qdBuocChanged
+        const qdKQChanged = JSON.stringify(danhSachQuyetDinhKetQua) !== JSON.stringify(originalDanhSachQuyetDinhKetQua)
+        const textKQChanged = ketQuaKetThucText !== originalKetQuaKetThucText
+        return formChanged || tlChanged || qdChanged || qdBuocChanged || qdKQChanged || textKQChanged
     }
 
-    const handleSave = async () => {
+    const buildKetQuaPayload = () => {
+        return JSON.stringify({
+            text: ketQuaKetThucText,
+            quyet_dinh: danhSachQuyetDinhKetQua
+        })
+    }
+
+    const handleSave = async (forceComplete: boolean | any = false) => {
         if (!record) return
+        
+        const isForceComplete = forceComplete === true;
+        const hasKetQua = ketQuaKetThucText.trim() !== '' || danhSachQuyetDinhKetQua.some(qd => qd.so_quyet_dinh.trim() !== '' || qd.ngay_ban_hanh.trim() !== '' || qd.co_quan_ban_hanh.trim() !== '');
+        
+        if (!isForceComplete && hasKetQua && record.status !== 'COMPLETED') {
+            setShowCompleteConfirm(true);
+            return;
+        }
+
         setLoading(true)
 
         const payload = {
@@ -513,8 +547,9 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             nghia_vu_thi_hanh: form.nghia_vu_thi_hanh || null,
             quyet_dinh_buoc_thi_hanh: JSON.stringify(danhSachQuyetDinhBuoc),
             ly_do_cho_theo_doi: form.ly_do_cho_theo_doi || null,
-            ket_qua_cuoi_cung: form.ket_qua_cuoi_cung || null,
+            ket_qua_cuoi_cung: buildKetQuaPayload(),
             tien_do_cap_nhat: timeline,
+            status: isForceComplete || record.status === 'COMPLETED' ? 'COMPLETED' : record.status
         }
 
         const { error } = await supabase.from('an_hanh_chinh').update(payload).eq('id', record.id)
@@ -529,11 +564,13 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
         setOriginalTimeline(timeline)
         setOriginalDanhSachQuyetDinh(JSON.parse(JSON.stringify(danhSachQuyetDinh)))
         setOriginalDanhSachQuyetDinhBuoc(JSON.parse(JSON.stringify(danhSachQuyetDinhBuoc)))
+        setOriginalDanhSachQuyetDinhKetQua(JSON.parse(JSON.stringify(danhSachQuyetDinhKetQua)))
+        setOriginalKetQuaKetThucText(ketQuaKetThucText)
         Object.assign(record, payload)
         if (onSuccess) onSuccess()
     }
 
-    const handleMoveToStatus = async (status: 'WATCHING' | 'COMPLETED') => {
+    const handleMoveToStatus = async (status: 'WATCHING' | 'COMPLETED' | 'PENDING') => {
         if (!record) return
         setLoading(true)
 
@@ -544,7 +581,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             nghia_vu_thi_hanh: form.nghia_vu_thi_hanh || null,
             quyet_dinh_buoc_thi_hanh: JSON.stringify(danhSachQuyetDinhBuoc),
             ly_do_cho_theo_doi: form.ly_do_cho_theo_doi || null,
-            ket_qua_cuoi_cung: form.ket_qua_cuoi_cung || null,
+            ket_qua_cuoi_cung: buildKetQuaPayload(),
             tien_do_cap_nhat: timeline,
             status,
         }
@@ -557,7 +594,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             return
         }
 
-        toast.success(`Đã chuyển sang trạng thái "${status === 'WATCHING' ? 'Chờ theo dõi' : 'Án xong'}"`)
+        toast.success(`Đã chuyển sang trạng thái "${status === 'WATCHING' ? 'Chờ theo dõi' : status === 'COMPLETED' ? 'Đã thi hành' : 'Đang thi hành'}"`)
         if (onSuccess) onSuccess()
         onClose()
     }
@@ -565,7 +602,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
     const statusBadge = {
         PENDING: { label: 'Đang thi hành', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
         WATCHING: { label: 'Chờ theo dõi', cls: 'bg-blue-100 text-blue-700 border-blue-200' },
-        COMPLETED: { label: 'Án xong', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+        COMPLETED: { label: 'Đã thi hành', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
     }[record.status] ?? { label: record.status, cls: 'bg-slate-100 text-slate-600 border-slate-200' }
 
     return (
@@ -817,17 +854,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                     emptyColor={record.status === 'WATCHING' ? 'text-blue-400' : 'text-slate-400'}
                                     emptyLabel="Chưa có dữ liệu"
                                 />
-                                {form.ly_do_cho_theo_doi?.trim() && record.status !== 'WATCHING' && (
-                                    <div className="flex justify-end mt-4">
-                                        <button
-                                            onClick={() => handleMoveToStatus('WATCHING')}
-                                            disabled={loading}
-                                            className="px-6 py-2 text-sm font-bold text-white bg-red-600 border border-red-600 rounded-xl hover:bg-red-700 hover:border-red-700 hover:shadow-[0_8px_20px_-6px_rgba(220,38,38,0.4)] transition-all duration-300 active:scale-95 disabled:opacity-50 flex items-center gap-2"
-                                        >
-                                            <ArrowRightCircle className="w-4 h-4" /> Chuyển sang Chờ theo dõi
-                                        </button>
-                                    </div>
-                                )}
+
                             </div>
 
                             {/* 9. Kết quả cuối cùng */}
@@ -835,29 +862,89 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                 'rounded-xl border p-5 shadow-sm space-y-4',
                                 record.status === 'COMPLETED' ? 'bg-white border-emerald-200' : 'bg-white border-slate-200'
                             )}>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 mb-2">
                                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">9</span>
+                                    <div className="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center shrink-0">
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                    </div>
                                     <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest">
                                         Kết quả thi hành án
                                     </h3>
                                 </div>
+                                
+                                {/* 9.1 Các Quyết định thi hành xong */}
+                                <div className="space-y-3 p-4 bg-emerald-50/40 border border-emerald-100 rounded-xl">
+                                    <label className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block mb-3">Thông tin Quyết định thi hành án xong</label>
+                                    <div className="space-y-3">
+                                        {danhSachQuyetDinhKetQua.map((qd, index) => (
+                                            <div key={qd.id || index} className="p-3 bg-white border border-emerald-200 rounded-xl relative group transition-colors hover:border-emerald-300 shadow-sm">
+                                                {danhSachQuyetDinhKetQua.length > 1 && (
+                                                    <button 
+                                                        onClick={() => removeQuyetDinhKetQua(qd.id!)}
+                                                        className="absolute -top-2 -right-2 w-[22px] h-[22px] bg-white border border-red-200 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 opacity-0 group-hover:opacity-100 transition-all shadow-sm z-10"
+                                                        title="Xóa mục này"
+                                                    >
+                                                        <X className="w-3.5 h-3.5" />
+                                                    </button>
+                                                )}
+                                                <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px_1.5fr] gap-3">
+                                                    <div>
+                                                        <label className="text-[10px] uppercase font-bold text-emerald-600/80 tracking-wide mb-1 block">Số Quyết định</label>
+                                                        <input 
+                                                            value={qd.so_quyet_dinh}
+                                                            onChange={e => updateQuyetDinhKetQua(qd.id!, 'so_quyet_dinh', e.target.value)}
+                                                            className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm px-2.5 py-1.5 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 transition-all"
+                                                            placeholder="VD: 03/2026/QĐ-THA..."
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[10px] uppercase font-bold text-emerald-600/80 tracking-wide mb-1 block">Ngày ban hành</label>
+                                                        <DateInput 
+                                                            value={qd.ngay_ban_hanh}
+                                                            onChange={val => updateQuyetDinhKetQua(qd.id!, 'ngay_ban_hanh', val)}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[10px] uppercase font-bold text-emerald-600/80 tracking-wide mb-1 block">Cơ quan ban hành</label>
+                                                        <input 
+                                                            value={qd.co_quan_ban_hanh}
+                                                            onChange={e => updateQuyetDinhKetQua(qd.id!, 'co_quan_ban_hanh', e.target.value)}
+                                                            className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm px-2.5 py-1.5 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 transition-all"
+                                                            placeholder="VD: TAND Tỉnh..."
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={addQuyetDinhKetQua}
+                                        className="w-full mt-2 py-2 flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-600 bg-white hover:bg-emerald-50 border-2 border-emerald-200 border-dashed rounded-xl transition-all active:scale-[0.99]"
+                                    >
+                                        <Plus className="w-4 h-4" /> THÊM QĐ KẾT THÚC
+                                    </button>
+                                </div>
+
+                                {/* 9.2 Ghi chú văn bản */}
                                 <EditableField
-                                    label="Chi tiết kết quả"
-                                    value={form.ket_qua_cuoi_cung ?? ''}
-                                    onChange={v => updateField('ket_qua_cuoi_cung', v)}
+                                    label="Ghi chú kết quả (Văn bản)"
+                                    value={ketQuaKetThucText}
+                                    onChange={setKetQuaKetThucText}
                                     multiline
                                     colorClass={record.status === 'COMPLETED' ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}
                                     emptyColor={record.status === 'COMPLETED' ? 'text-emerald-400' : 'text-slate-400'}
-                                    emptyLabel="Chưa kết thúc"
+                                    emptyLabel="Nhập text Đã xong hoặc chi tiết..."
                                 />
-                                {form.ket_qua_cuoi_cung?.trim() && record.status !== 'COMPLETED' && (
+
+                                {record.status === 'COMPLETED' && (
                                     <div className="flex justify-end mt-4">
                                         <button
-                                            onClick={() => handleMoveToStatus('COMPLETED')}
+                                            onClick={() => handleMoveToStatus('PENDING')}
                                             disabled={loading}
-                                            className="px-6 py-2 text-sm font-bold text-white bg-emerald-600 border border-emerald-600 rounded-xl hover:bg-emerald-700 hover:border-emerald-700 hover:shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] transition-all duration-300 active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                            className="px-4 py-2 text-sm font-bold text-amber-600 bg-white border border-amber-200 rounded-xl hover:bg-amber-50 hover:border-amber-400 hover:shadow-sm transition-all duration-300 active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                            title="Hoàn tác bản án về trạng thái Đang thi hành"
                                         >
-                                            <CheckCircle2 className="w-4 h-4" /> Chuyển sang Án xong
+                                            <Undo2 className="w-4 h-4" /> Hoàn tác (Chuyển về Đang thi hành)
                                         </button>
                                     </div>
                                 )}
@@ -1037,6 +1124,20 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                     </div>
                 </div>
             </div>
+
+            <ConfirmModal
+                open={showCompleteConfirm}
+                title="Xác nhận Kết thúc án"
+                message="Bản án đã được cập nhật thông tin 'Kết quả thi hành án'. Bạn có muốn lưu thay đổi và đồng thời chuyển bản án này sang danh sách ĐÃ THI HÀNH không?"
+                confirmLabel="Lưu & Kết thúc án"
+                variant="default"
+                loading={loading}
+                onConfirm={() => {
+                    setShowCompleteConfirm(false);
+                    handleSave(true);
+                }}
+                onCancel={() => setShowCompleteConfirm(false)}
+            />
         </div>
     )
 }

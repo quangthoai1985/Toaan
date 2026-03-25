@@ -176,74 +176,51 @@ export default function AnHanhChinhPage() {
         )
     }
 
-    // Status transition actions per tab
-    function getStatusActions(currentTab: TabKey): StatusAction[] {
-        switch (currentTab) {
-            case 'PENDING':
-                return [
-                    {
-                        targetStatus: 'WATCHING',
-                        label: 'Chờ theo dõi',
-                        icon: <PauseCircle className="w-3.5 h-3.5" />,
-                        className: 'text-blue-700 bg-blue-50/80 hover:bg-blue-100 ring-1 ring-blue-500/20',
-                        confirmTitle: 'Chuyển sang Chờ theo dõi',
-                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" sang trạng thái "Chờ theo dõi"?`,
-                        successMessage: 'Đã chuyển sang "Chờ theo dõi"',
-                    },
-                    {
-                        targetStatus: 'COMPLETED',
-                        label: 'Án xong',
-                        icon: <CheckCircle2 className="w-3.5 h-3.5" />,
-                        className: 'text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100 ring-1 ring-emerald-500/20',
-                        confirmTitle: 'Chuyển sang Án xong',
-                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" sang trạng thái "Án xong"?`,
-                        successMessage: 'Đã chuyển sang "Án xong"',
-                    },
-                ]
-            case 'WATCHING':
-                return [
-                    {
-                        targetStatus: 'PENDING',
-                        label: 'Đang thi hành',
-                        icon: <Clock className="w-3.5 h-3.5" />,
-                        className: 'text-amber-700 bg-amber-50/80 hover:bg-amber-100 ring-1 ring-amber-500/20',
-                        confirmTitle: 'Chuyển về Đang thi hành',
-                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" về trạng thái "Đang thi hành"?`,
-                        successMessage: 'Đã chuyển về "Đang thi hành"',
-                    },
-                    {
-                        targetStatus: 'COMPLETED',
-                        label: 'Án xong',
-                        icon: <CheckCircle2 className="w-3.5 h-3.5" />,
-                        className: 'text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100 ring-1 ring-emerald-500/20',
-                        confirmTitle: 'Chuyển sang Án xong',
-                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" sang trạng thái "Án xong"?`,
-                        successMessage: 'Đã chuyển sang "Án xong"',
-                    },
-                ]
-            case 'COMPLETED':
-                return [
-                    {
-                        targetStatus: 'PENDING',
-                        label: 'Đang thi hành',
-                        icon: <Clock className="w-3.5 h-3.5" />,
-                        className: 'text-amber-700 bg-amber-50/80 hover:bg-amber-100 ring-1 ring-amber-500/20',
-                        confirmTitle: 'Chuyển về Đang thi hành',
-                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" về trạng thái "Đang thi hành"?`,
-                        successMessage: 'Đã chuyển về "Đang thi hành"',
-                    },
-                    {
-                        targetStatus: 'WATCHING',
-                        label: 'Chờ theo dõi',
-                        icon: <PauseCircle className="w-3.5 h-3.5" />,
-                        className: 'text-blue-700 bg-blue-50/80 hover:bg-blue-100 ring-1 ring-blue-500/20',
-                        confirmTitle: 'Chuyển sang Chờ theo dõi',
-                        confirmMessage: (s) => `Bạn có chắc muốn chuyển "${s}" sang trạng thái "Chờ theo dõi"?`,
-                        successMessage: 'Đã chuyển sang "Chờ theo dõi"',
-                    },
-                ]
+    function renderKetQuaKetThuc(str: string | null | undefined) {
+        if (!str) return <span className="text-slate-400 italic text-[13px]">—</span>
+        let text = ''
+        let qdList: QuyetDinhEntry[] = []
+        try {
+            const parsed = JSON.parse(str)
+            if (Array.isArray(parsed)) {
+                qdList = parsed
+            } else if (typeof parsed === 'object' && parsed !== null) {
+                text = parsed.text || ''
+                qdList = parsed.quyet_dinh || []
+            } else {
+                text = str
+            }
+        } catch {
+            text = str
         }
+        
+        const validQdList = qdList.filter(q => q.so_quyet_dinh?.trim() || q.ngay_ban_hanh?.trim())
+        
+        if (!text.trim() && validQdList.length === 0) {
+            return <span className="text-slate-400 italic text-[13px]">—</span>
+        }
+        
+        return (
+            <div className="flex flex-col gap-1.5">
+                {validQdList.map((qd, i) => (
+                    <div key={i} className="flex flex-col items-start bg-emerald-50/50 px-2 py-1.5 rounded-md border border-emerald-100">
+                        <span className="text-emerald-700 font-bold text-[12px]">{qd.so_quyet_dinh || '—'}</span>
+                        {(qd.ngay_ban_hanh || qd.co_quan_ban_hanh) && (
+                            <span className="text-[10px] text-emerald-600/70 font-medium">
+                                {qd.ngay_ban_hanh && <>{new Date(qd.ngay_ban_hanh).toLocaleDateString('vi-VN')} • </>}
+                                {qd.co_quan_ban_hanh || '—'}
+                            </span>
+                        )}
+                    </div>
+                ))}
+                {text.trim() && (
+                    <span className="text-[13px] text-slate-600 leading-snug">{text}</span>
+                )}
+            </div>
+        )
     }
+
+
 
     const tabs: { key: TabKey; label: string; count: number; badgeActive: string; badgeInactive: string; indicator: string }[] = [
         {
@@ -255,24 +232,14 @@ export default function AnHanhChinhPage() {
             indicator: 'bg-amber-500'
         },
         {
-            key: 'WATCHING',
-            label: 'CHỜ THEO DÕI',
-            count: watchingCount,
-            badgeActive: 'bg-blue-100/80 text-blue-700 ring-1 ring-blue-500/30',
-            badgeInactive: 'bg-slate-100 text-slate-500 ring-1 ring-slate-200',
-            indicator: 'bg-blue-500'
-        },
-        {
             key: 'COMPLETED',
-            label: 'ÁN XONG',
+            label: 'ĐÃ THI HÀNH',
             count: completedCount,
             badgeActive: 'bg-emerald-100/80 text-emerald-700 ring-1 ring-emerald-500/30',
             badgeInactive: 'bg-slate-100 text-slate-500 ring-1 ring-slate-200',
             indicator: 'bg-emerald-500'
         },
     ]
-
-    const statusActions = getStatusActions(activeTab)
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 flex flex-col flex-1 min-h-0 w-full h-full gap-5 mx-auto w-full">
@@ -386,49 +353,33 @@ export default function AnHanhChinhPage() {
                                         title="Chọn tất cả"
                                     />
                                 </th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest w-[60px] whitespace-nowrap">
-                                    <div className="flex flex-col items-center justify-center gap-1.5">
-                                        <span>STT</span>
-                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">1</span>
-                                    </div>
-                                </th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">
-                                    <div className="flex flex-col items-center justify-center gap-1.5">
-                                        <span>Người khởi kiện</span>
-                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">2</span>
-                                    </div>
-                                </th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">
-                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
-                                        <span>Số Bản án (Quyết Định phải Thi hành án)</span>
-                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">3</span>
-                                    </div>
-                                </th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px]">
-                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
-                                        <span>Người phải thi hành</span>
-                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">4</span>
-                                    </div>
-                                </th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">
-                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
-                                        <span>Nghĩa vụ phải Thi hành án</span>
-                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">5</span>
-                                    </div>
-                                </th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px]">
-                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
-                                        <span>QĐ buộc Thi hành án</span>
-                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">6</span>
-                                    </div>
-                                </th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[240px]">
-                                    <div className="flex flex-col items-center justify-center gap-1.5 text-center">
-                                        <span>Quá trình Thi hành án</span>
-                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0 leading-none">7</span>
-                                    </div>
-                                </th>
-                                <th className="px-5 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[220px]">Hành động</th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest w-[60px] whitespace-nowrap text-center">STT</th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px] text-center">Người khởi kiện</th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Số Bản án (Quyết Định phải Thi hành án)</th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px] text-center">Người phải thi hành</th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Nghĩa vụ phải Thi hành án</th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">QĐ buộc Thi hành án</th>
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[240px] text-center">Quá trình Thi hành án</th>
+                                {activeTab === 'PENDING' && (
+                                    <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Chờ theo dõi</th>
+                                )}
+                                {activeTab === 'COMPLETED' && (
+                                    <>
+                                        <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Chờ theo dõi</th>
+                                        <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Kết quả thi hành án</th>
+                                    </>
+                                )}
+                            </tr>
+                            {/* Horizontal Numbers Row */}
+                            <tr className="border-none">
+                                <th className="p-0 border-none"></th>
+                                {[1, 2, 3, 4, 5, 6, 7, ...(activeTab === 'PENDING' ? [8] : []), ...(activeTab === 'COMPLETED' ? [8, 9] : [])].map(num => (
+                                    <th key={num} className="p-0 h-0 relative border-none">
+                                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-md z-20 pointer-events-none ring-2 ring-white">
+                                            {num}
+                                        </div>
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -450,7 +401,20 @@ export default function AnHanhChinhPage() {
                                         />
                                     </td>
                                     <td className="px-5 py-3.5 text-slate-400 text-center font-mono text-xs font-medium">{idx + 1}</td>
-                                    <td className="px-5 py-3.5 text-slate-800 font-semibold">{row.nguoi_khoi_kien}</td>
+                                    <td className="px-5 py-3.5 text-slate-800 font-semibold">
+                                        {row.nguoi_khoi_kien
+                                            ? row.nguoi_khoi_kien
+                                                .split(/\r?\n/)
+                                                .map(s => s.trim())
+                                                .filter(Boolean)
+                                                .map((name, i) => (
+                                                    <div key={i} className={i > 0 ? 'mt-1 pt-1 border-t border-slate-100' : ''}>
+                                                        {name}
+                                                    </div>
+                                                ))
+                                            : '—'
+                                        }
+                                    </td>
                                     <td className="px-5 py-3.5 text-slate-600 font-medium">
                                         {renderQuyetDinh(row.so_ban_an)}
                                     </td>
@@ -472,29 +436,22 @@ export default function AnHanhChinhPage() {
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-5 py-3.5" onClick={e => e.stopPropagation()}>
-                                        <div className="flex flex-col items-center justify-center gap-2">
-                                            <span className="text-[10px] font-bold text-slate-400/80 uppercase tracking-wider mb-0.5">Chuyển trạng thái</span>
-                                            {/* Status transition buttons */}
-                                            {statusActions.map(action => (
-                                                <button
-                                                    key={action.targetStatus}
-                                                    onClick={() => openStatusChange(row, action)}
-                                                    title={action.confirmTitle}
-                                                    className={cn(
-                                                        'group relative w-full max-w-[135px] flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden',
-                                                        action.className
-                                                    )}
-                                                >
-                                                    <span className="flex items-center gap-1.5 relative z-10">
-                                                        {action.icon}
-                                                        <span>{action.label}</span>
-                                                    </span>
-                                                    <ArrowRightCircle className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 relative z-10" />
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </td>
+                                    {activeTab === 'PENDING' && (
+                                        <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug">
+                                            {row.ly_do_cho_theo_doi ? truncate(row.ly_do_cho_theo_doi, 100) : <span className="text-slate-400 italic">—</span>}
+                                        </td>
+                                    )}
+                                    {activeTab === 'COMPLETED' && (
+                                        <>
+                                            <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug">
+                                                {row.ly_do_cho_theo_doi ? truncate(row.ly_do_cho_theo_doi, 100) : <span className="text-slate-400 italic">—</span>}
+                                            </td>
+                                            <td className="px-5 py-3.5 text-slate-600 text-[13px] leading-snug">
+                                                {renderKetQuaKetThuc(row.ket_qua_cuoi_cung)}
+                                            </td>
+                                        </>
+                                    )}
+
                                 </tr>
                             ))}
                         </tbody>

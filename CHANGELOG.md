@@ -5,6 +5,19 @@ All notable changes to the **Quản Lý Án Hành Chính** project will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-03-25
+
+### Added
+- **Trang Tổng Quan Thống Kê:** Khởi tạo trang `/tong-quan` mới hoạt động như Dashboard chính thay thế danh sách án.
+  - Tích hợp 4 KPI Cards nổi bật: Tổng số án, Số án đã thi hành, Số án đang thi hành, và Số án chờ theo dõi.
+  - Logic thống kê thông minh: Nhận diện án "Chờ theo dõi" trực tiếp từ danh sách "Đang thi hành" (thông qua dữ liệu có trong cột Lý do chờ theo dõi).
+  - Tích hợp thư viện `Chart.js` hiển thị trực quan tỷ lệ bằng Biểu đồ Tròn (Trạng thái án), Biểu đồ Cột (So sánh trạng thái), và Biểu đồ Thanh ngang (Top 8 cơ quan có nhiều án nhất).
+  - Thanh tiến độ (Progress bar) hiển thị tỷ lệ % án đã hoàn thành.
+
+### Changed
+- Cập nhật Redirect mặc định của trang chủ (`/`) chuyển hướng sang trang Tổng Quan thay vì trang danh sách Quản lý án như trước.
+- **Tối ưu hiển thị nhiều người:** Cải tiến UI bảng danh sách tại `AnHanhChinhPage`. Cột "Người khởi kiện" giờ đây hỗ trợ tự động xuống dòng và phân cách bằng đường kẻ mờ đối với các vụ án có nhiều người khởi kiện (đọc từ ký tự xuống dòng `\r\n`).
+
 ## [1.3.0] - 2026-03-24
 
 ### Added
