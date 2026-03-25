@@ -1,4 +1,5 @@
-import ExcelJS from 'exceljs'
+// ExcelJS is loaded dynamically at runtime to avoid server-side bundling
+// (Cloudflare Workers doesn't support Node.js APIs used by ExcelJS)
 
 // ═══════════════════════════════════════════════════════════════════
 // Color Palette
@@ -47,7 +48,7 @@ const FONT_MAIN = 'Arial'
 // ═══════════════════════════════════════════════════════════════════
 // Helper: Standard thin border
 // ═══════════════════════════════════════════════════════════════════
-function thinBorder(): Partial<ExcelJS.Borders> {
+function thinBorder(): any {
     return {
         top: { style: 'thin', color: { argb: COLORS.border } },
         bottom: { style: 'thin', color: { argb: COLORS.border } },
@@ -59,9 +60,9 @@ function thinBorder(): Partial<ExcelJS.Borders> {
 // ═══════════════════════════════════════════════════════════════════
 // Helper: Apply header style to a row
 // ═══════════════════════════════════════════════════════════════════
-function applyHeaderStyle(row: ExcelJS.Row, colCount: number) {
+function applyHeaderStyle(row: any, colCount: number) {
     row.height = 40
-    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    row.eachCell({ includeEmpty: true }, (cell: any, colNumber: any) => {
         if (colNumber > colCount) return
         cell.font = { name: FONT_MAIN, bold: true, size: 11, color: { argb: COLORS.headerText } }
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.headerBg } }
@@ -78,9 +79,9 @@ function applyHeaderStyle(row: ExcelJS.Row, colCount: number) {
 // ═══════════════════════════════════════════════════════════════════
 // Helper: Apply number row style
 // ═══════════════════════════════════════════════════════════════════
-function applyNumRowStyle(row: ExcelJS.Row, colCount: number) {
+function applyNumRowStyle(row: any, colCount: number) {
     row.height = 22
-    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    row.eachCell({ includeEmpty: true }, (cell: any, colNumber: any) => {
         if (colNumber > colCount) return
         cell.font = { name: FONT_MAIN, bold: true, size: 10, color: { argb: COLORS.numText } }
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.numBg } }
@@ -92,9 +93,9 @@ function applyNumRowStyle(row: ExcelJS.Row, colCount: number) {
 // ═══════════════════════════════════════════════════════════════════
 // Helper: Apply guide row style
 // ═══════════════════════════════════════════════════════════════════
-function applyGuideRowStyle(row: ExcelJS.Row, colCount: number) {
+function applyGuideRowStyle(row: any, colCount: number) {
     row.height = 55
-    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    row.eachCell({ includeEmpty: true }, (cell: any, colNumber: any) => {
         if (colNumber > colCount) return
         cell.font = { name: FONT_MAIN, italic: true, size: 10, color: { argb: COLORS.guideText } }
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.guideBg } }
@@ -106,9 +107,9 @@ function applyGuideRowStyle(row: ExcelJS.Row, colCount: number) {
 // ═══════════════════════════════════════════════════════════════════
 // Helper: Apply data row style
 // ═══════════════════════════════════════════════════════════════════
-function applyDataRowStyle(row: ExcelJS.Row, colCount: number, isEven: boolean) {
+function applyDataRowStyle(row: any, colCount: number, isEven: boolean) {
     row.height = 80
-    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    row.eachCell({ includeEmpty: true }, (cell: any, colNumber: any) => {
         if (colNumber > colCount) return
         cell.font = { name: FONT_MAIN, size: 10, color: { argb: '334155' } }
         if (isEven) {
@@ -128,7 +129,8 @@ function applyDataRowStyle(row: ExcelJS.Row, colCount: number, isEven: boolean) 
 // Main: Build and Download
 // ═══════════════════════════════════════════════════════════════════
 export async function downloadExcelTemplate() {
-    const wb = new ExcelJS.Workbook()
+    const ExcelJS = await import('exceljs')
+    const wb = new ExcelJS.default.Workbook()
     wb.creator = 'Hệ thống Quản Lý Án Hành Chính'
     wb.created = new Date()
 
@@ -159,7 +161,7 @@ export async function downloadExcelTemplate() {
 // ═══════════════════════════════════════════════════════════════════
 // SHEET 1: Đang thi hành (PENDING)
 // ═══════════════════════════════════════════════════════════════════
-function buildPendingSheet(wb: ExcelJS.Workbook) {
+function buildPendingSheet(wb: any) {
     const ws = wb.addWorksheet('Mẫu - Đang thi hành', {
         properties: { tabColor: { argb: 'F59E0B' } },
         views: [{ state: 'frozen', ySplit: 3, activeCell: 'A4' }],
@@ -234,7 +236,7 @@ function buildPendingSheet(wb: ExcelJS.Workbook) {
 // ═══════════════════════════════════════════════════════════════════
 // SHEET 2: Đã thi hành (COMPLETED)
 // ═══════════════════════════════════════════════════════════════════
-function buildCompletedSheet(wb: ExcelJS.Workbook) {
+function buildCompletedSheet(wb: any) {
     const ws = wb.addWorksheet('Mẫu - Đã thi hành', {
         properties: { tabColor: { argb: '10B981' } },
         views: [{ state: 'frozen', ySplit: 3, activeCell: 'A4' }],
@@ -314,7 +316,7 @@ function buildCompletedSheet(wb: ExcelJS.Workbook) {
 // ═══════════════════════════════════════════════════════════════════
 // SHEET 3: Hướng dẫn — Thiết kế màu theo cột
 // ═══════════════════════════════════════════════════════════════════
-function buildGuideSheet(wb: ExcelJS.Workbook) {
+function buildGuideSheet(wb: any) {
     const ws = wb.addWorksheet('Hướng dẫn', {
         properties: { tabColor: { argb: '3B82F6' } },
     })
