@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { AnHanhChinh, TienDoEntry, QuyetDinhEntry } from '@/lib/types'
 import { cn, truncate, getSoBanAnText, formatQuyetDinh } from '@/lib/utils'
-import { Search, Plus, Pencil, Eye, CheckCircle2, Undo2, RefreshCw, Loader2, Trash2, UploadCloud, ArrowRightCircle, Clock, PauseCircle, Calendar, Building2 } from 'lucide-react'
+import { Search, Plus, Pencil, Eye, CheckCircle2, Undo2, Download, Loader2, Trash2, UploadCloud, ArrowRightCircle, Clock, PauseCircle, Calendar, Building2 } from 'lucide-react'
+import { downloadExcelTemplate } from '@/lib/excelTemplate'
 import { useToast } from './Toast'
 import AddAnModal from './AddAnModal'
 import CompleteAnModal from './CompleteAnModal'
@@ -259,10 +260,10 @@ export default function AnHanhChinhPage() {
                         </button>
                     )}
                     <button
-                        onClick={fetchData}
-                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-white border border-slate-200/80 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm active:scale-95"
+                        onClick={downloadExcelTemplate}
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200/60 rounded-xl hover:bg-blue-100 hover:text-blue-800 transition-all shadow-sm active:scale-95"
                     >
-                        <RefreshCw className="w-4 h-4" /> Tải lại
+                        <Download className="w-4 h-4" /> Tải file Excel mẫu
                     </button>
                     <button
                         onClick={() => setShowImportModal(true)}
@@ -338,13 +339,13 @@ export default function AnHanhChinhPage() {
                         <p className="text-xs text-slate-400 mt-1">Thử thay đổi bộ lọc tìm kiếm hoặc thêm mới án</p>
                     </div>
                 ) : (
-                    <table className="w-full text-sm">
-                        <thead className="bg-slate-50/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200/80 shadow-sm">
+                    <table className="w-full text-sm border-separate border-spacing-0">
+                        <thead className="bg-red-950 sticky top-0 z-20 shadow-md">
                             <tr>
-                                <th className="px-4 py-3.5 w-12 text-center">
+                                <th className="px-4 py-4 w-12 text-center border-b border-red-900/50">
                                     <input
                                         type="checkbox"
-                                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                        className="w-4 h-4 rounded border-red-800 bg-red-900/20 text-red-500 focus:ring-red-500 cursor-pointer"
                                         checked={data.length > 0 && selectedIds.length === data.length}
                                         onChange={(e) => {
                                             if (e.target.checked) setSelectedIds(data.map(d => d.id))
@@ -353,29 +354,29 @@ export default function AnHanhChinhPage() {
                                         title="Chọn tất cả"
                                     />
                                 </th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest w-[60px] whitespace-nowrap text-center">STT</th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px] text-center">Người khởi kiện</th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Số Bản án (Quyết Định phải Thi hành án)</th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[180px] text-center">Người phải thi hành</th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Nghĩa vụ phải Thi hành án</th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">QĐ buộc Thi hành án</th>
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[240px] text-center">Quá trình Thi hành án</th>
+                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest w-[60px] whitespace-nowrap text-center border-b border-red-900/50">STT</th>
+                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[180px] text-center border-b border-red-900/50">Người khởi kiện</th>
+                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Số Bản án (Quyết Định phải Thi hành án)</th>
+                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[180px] text-center border-b border-red-900/50">Người phải thi hành</th>
+                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Nghĩa vụ phải Thi hành án</th>
+                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">QĐ buộc Thi hành án</th>
+                                <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[240px] text-center border-b border-red-900/50">Quá trình Thi hành án</th>
                                 {activeTab === 'PENDING' && (
-                                    <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Chờ theo dõi</th>
+                                    <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Chờ theo dõi</th>
                                 )}
                                 {activeTab === 'COMPLETED' && (
                                     <>
-                                        <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Chờ theo dõi</th>
-                                        <th className="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-widest min-w-[200px] text-center">Kết quả thi hành án</th>
+                                        <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Chờ theo dõi</th>
+                                        <th className="px-5 py-4 text-[11px] font-bold text-red-100/80 uppercase tracking-widest min-w-[200px] text-center border-b border-red-900/50">Kết quả thi hành án</th>
                                     </>
                                 )}
                             </tr>
                             {/* Horizontal Numbers Row */}
-                            <tr className="border-none">
-                                <th className="p-0 border-none"></th>
+                            <tr className="bg-red-50/90 border-b border-red-100">
+                                <th className="p-0 border-none h-8"></th>
                                 {[1, 2, 3, 4, 5, 6, 7, ...(activeTab === 'PENDING' ? [8] : []), ...(activeTab === 'COMPLETED' ? [8, 9] : [])].map(num => (
-                                    <th key={num} className="p-0 h-0 relative border-none">
-                                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-md z-20 pointer-events-none ring-2 ring-white">
+                                    <th key={num} className="p-0 h-8 relative border-none border-l border-red-200/30 first:border-l-0">
+                                        <div className="flex items-center justify-center w-5 h-5 mx-auto rounded-full bg-red-100 text-red-700 text-[10px] font-black shadow-sm ring-1 ring-red-200">
                                             {num}
                                         </div>
                                     </th>

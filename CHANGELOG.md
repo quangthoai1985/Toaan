@@ -5,6 +5,18 @@ All notable changes to the **Quản Lý Án Hành Chính** project will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-03-25
+
+### Added
+- **Tính năng Tải file Excel mẫu:** Bổ sung khả năng tạo và tải xuống file Excel mẫu (.xlsx) trực tiếp từ trình duyệt.
+  - File mẫu gồm 3 sheet: "Mẫu - Đang thi hành", "Mẫu - Đã thi hành" và "Hướng dẫn".
+  - Thiết kế chuyên nghiệp với Header đỏ đậm, hướng dẫn chi tiết từng cột và dữ liệu mẫu thực tế hỗ trợ người dùng nhập liệu chính xác.
+  - Tích hợp logic tự động bóc tách ngày tháng và mapping đơn vị hành chính.
+
+### Changed
+- **Giao diện AnHanhChinhPage:** Thay thế nút "Tải lại" bằng nút "Tải file Excel mẫu" với icon Download và màu sắc xanh dương đồng bộ, giúp người dùng dễ dàng tiếp cận biểu mẫu chuẩn để import dữ liệu.
+
+
 ## [1.4.0] - 2026-03-25
 
 ### Added
