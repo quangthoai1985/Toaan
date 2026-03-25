@@ -64,7 +64,11 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
                     col2String === 'người bị kiện' ||
                     col2String === 'người phải thi hành' ||
                     col2String === 'người phải thi hành án' ||
-                    col2String === 'người phải tha'
+                    col2String === 'người phải tha' ||
+                    sttString === '2' || sttString === 'họ tên người khởi kiện. nhiều người: mỗi dòng 1 tên (alt+enter)' ||
+                    col1String.includes('format:') || col1String.includes('nhiều qđ') || col1String.includes('họ tên') ||
+                    col2String.includes('tên cơ quan') || col2String.includes('format') ||
+                    String(row[6] || '').trim().toLowerCase().includes('mỗi mốc tiến độ')
                 ) {
                     continue;
                 }
