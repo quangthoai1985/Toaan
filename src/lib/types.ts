@@ -15,6 +15,7 @@ export interface AnHanhChinh {
     status: 'PENDING' | 'WATCHING' | 'COMPLETED'
     ly_do_cho_theo_doi: string | null
     ket_qua_cuoi_cung: string | null
+    phan_loai_ket_qua: string | null
     tien_do_cap_nhat: TienDoEntry[]
     created_at: string
     updated_at: string

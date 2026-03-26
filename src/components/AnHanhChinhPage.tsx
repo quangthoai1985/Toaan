@@ -7,6 +7,7 @@ import { cn, truncate, getSoBanAnText, formatQuyetDinh } from '@/lib/utils'
 import { Search, Plus, Pencil, Eye, CheckCircle2, Undo2, Download, Loader2, Trash2, UploadCloud, ArrowRightCircle, Clock, PauseCircle, Calendar, Building2 } from 'lucide-react'
 import { downloadExcelTemplate } from '@/lib/excelTemplate'
 import { useToast } from './Toast'
+import { useAuth } from './AuthProvider'
 import AddAnModal from './AddAnModal'
 import CompleteAnModal from './CompleteAnModal'
 import DetailModal from './DetailModal'
@@ -28,6 +29,7 @@ interface StatusAction {
 export default function AnHanhChinhPage() {
     const supabase = createClient()
     const toast = useToast()
+    const { scope, isAdmin } = useAuth()
     const [activeTab, setActiveTab] = useState<TabKey>('PENDING')
     const [data, setData] = useState<AnHanhChinh[]>([])
     const [loading, setLoading] = useState(true)
@@ -60,6 +62,11 @@ export default function AnHanhChinhPage() {
             .eq('status', activeTab)
             .order('updated_at', { ascending: false })
 
+        // Filter by scope if user has restricted access
+        if (scope && scope.length > 0) {
+            query = query.in('nguoi_phai_thi_hanh', scope)
+        }
+
         if (search.trim()) {
             const s = `%${search.trim()}%`
             query = query.or(`so_ban_an.ilike.${s},nguoi_khoi_kien.ilike.${s}`)
@@ -72,18 +79,23 @@ export default function AnHanhChinhPage() {
             setSelectedIds([])
         }
 
-        // Fetch counts for all tabs
+        // Fetch counts for all tabs (also scoped)
+        const buildCountQuery = (status: string) => {
+            let q = supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', status)
+            if (scope && scope.length > 0) q = q.in('nguoi_phai_thi_hanh', scope)
+            return q
+        }
         const [pendingRes, watchingRes, completedRes] = await Promise.all([
-            supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'PENDING'),
-            supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'WATCHING'),
-            supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED'),
+            buildCountQuery('PENDING'),
+            buildCountQuery('WATCHING'),
+            buildCountQuery('COMPLETED'),
         ])
         setPendingCount(pendingRes.count ?? 0)
         setWatchingCount(watchingRes.count ?? 0)
         setCompletedCount(completedRes.count ?? 0)
 
         setLoading(false)
-    }, [activeTab, search])
+    }, [activeTab, search, scope])
 
     useEffect(() => { fetchData() }, [fetchData])
 
@@ -251,7 +263,7 @@ export default function AnHanhChinhPage() {
                     <p className="text-slate-500 text-sm mt-1">Quản lý và cập nhật tiến độ thi hành các bản án hành chính</p>
                 </div>
                 <div className="flex gap-2.5 shrink-0">
-                    {selectedIds.length > 0 && (
+                    {selectedIds.length > 0 && isAdmin && (
                         <button
                             onClick={() => setShowBulkDelete(true)}
                             className="flex items-center gap-1.5 px-4 py-2 text-sm bg-red-100 text-red-700 rounded-xl hover:bg-red-200 transition-all font-semibold shadow-sm active:scale-95"
@@ -259,18 +271,22 @@ export default function AnHanhChinhPage() {
                             <Trash2 className="w-4 h-4" /> Xóa đã chọn ({selectedIds.length})
                         </button>
                     )}
-                    <button
-                        onClick={downloadExcelTemplate}
-                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200/60 rounded-xl hover:bg-blue-100 hover:text-blue-800 transition-all shadow-sm active:scale-95"
-                    >
-                        <Download className="w-4 h-4" /> Tải file Excel mẫu
-                    </button>
-                    <button
-                        onClick={() => setShowImportModal(true)}
-                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60 rounded-xl hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
-                    >
-                        <UploadCloud className="w-4 h-4" /> Import Excel
-                    </button>
+                    {isAdmin && (
+                        <>
+                            <button
+                                onClick={downloadExcelTemplate}
+                                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200/60 rounded-xl hover:bg-blue-100 hover:text-blue-800 transition-all shadow-sm active:scale-95"
+                            >
+                                <Download className="w-4 h-4" /> Tải file Excel mẫu
+                            </button>
+                            <button
+                                onClick={() => setShowImportModal(true)}
+                                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60 rounded-xl hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+                            >
+                                <UploadCloud className="w-4 h-4" /> Import Excel
+                            </button>
+                        </>
+                    )}
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="flex items-center gap-1.5 px-4 py-2 text-sm bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all font-semibold shadow-[0_2px_10px_rgba(220,38,38,0.3)] hover:shadow-[0_4px_14px_rgba(220,38,38,0.4)] active:scale-95"

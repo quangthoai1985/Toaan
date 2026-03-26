@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Scale, LayoutDashboard, Building2, BarChart3 } from 'lucide-react'
+import { Scale, LayoutDashboard, Building2, BarChart3, LogOut, User } from 'lucide-react'
+import { useAuth } from './AuthProvider'
 
 export default function Header() {
     const pathname = usePathname()
+    const { profile, isAdmin, signOut } = useAuth()
     
     return (
         <header className="bg-red-950 border-b border-red-900/40 sticky top-0 z-50 h-[4.5rem] shadow-sm">
@@ -48,29 +50,48 @@ export default function Header() {
                         <LayoutDashboard className="w-4 h-4" />
                         Quản lý Án
                     </Link>
-                    <Link 
-                        href="/co-quan"
-                        className={cn(
-                            "flex items-center gap-2 px-4 h-full border-b-2 text-sm font-semibold transition-colors",
-                            pathname.startsWith('/co-quan')
-                                ? "border-red-400 text-white bg-white/5" 
-                                : "border-transparent text-red-100/60 hover:text-red-100 hover:bg-white/5"
-                        )}
-                    >
-                        <Building2 className="w-4 h-4" />
-                        Danh mục Cơ quan
-                    </Link>
+                    {isAdmin && (
+                        <Link 
+                            href="/co-quan"
+                            className={cn(
+                                "flex items-center gap-2 px-4 h-full border-b-2 text-sm font-semibold transition-colors",
+                                pathname.startsWith('/co-quan')
+                                    ? "border-red-400 text-white bg-white/5" 
+                                    : "border-transparent text-red-100/60 hover:text-red-100 hover:bg-white/5"
+                            )}
+                        >
+                            <Building2 className="w-4 h-4" />
+                            Danh mục Cơ quan
+                        </Link>
+                    )}
                 </div>
 
                 {/* Spacer */}
                 <div className="flex-1" />
 
-                {/* Right side info */}
-                <div className="flex items-center px-6 shrink-0 h-full">
-                    <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/20 ring-1 ring-white/5 shadow-inner backdrop-blur-sm">
-                        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-                        <span className="text-red-100/80 text-xs font-medium tracking-wide">Hệ thống đang hoạt động</span>
-                    </div>
+                {/* Right side - User info & Sign out */}
+                <div className="flex items-center px-6 shrink-0 h-full gap-3">
+                    {profile && (
+                        <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/20 ring-1 ring-white/5 shadow-inner backdrop-blur-sm">
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center ring-1 ring-white/20">
+                                <User className="w-3.5 h-3.5 text-white" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-white text-xs font-semibold leading-tight">{profile.display_name}</span>
+                                <span className="text-red-300/50 text-[10px] font-medium leading-tight">
+                                    {profile.role === 'admin' ? 'Quản trị viên' : profile.scope ? 'Tài khoản địa phương' : 'Người dùng'}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                    <button
+                        onClick={signOut}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-red-200/60 hover:text-white hover:bg-white/10 transition-all text-xs font-medium"
+                        title="Đăng xuất"
+                    >
+                        <LogOut className="w-3.5 h-3.5" />
+                        Đăng xuất
+                    </button>
                 </div>
             </div>
         </header>

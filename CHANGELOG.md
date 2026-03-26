@@ -5,6 +5,26 @@ All notable changes to the **Quản Lý Án Hành Chính** project will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-03-26
+
+### Added
+- **Hệ thống Xác thực & Phân quyền (Auth & RBAC):** Triển khai toàn diện khả năng bảo mật và phân quyền truy cập.
+  - Tích hợp **Supabase Auth** để quản lý tài khoản người dùng.
+  - Xây dựng trang **Đăng nhập (`/login`)** với phong cách Dark Mode hiện đại, tối ưu trải nghiệm người dùng.
+  - Sử dụng **Middleware** để kiểm soát truy cập trang, bảo vệ các dữ liệu nội bộ.
+  - Phát triển **AuthProvider** context để quản lý trạng thái phiên làm việc (session) và quyền hạn xuyên suốt ứng dụng.
+- **Quản lý Hồ sơ Người dùng:** Tạo bảng `user_profiles` lưu trữ vai trò (`admin`/`user`) và phạm vi quản lý dữ liệu (`scope`).
+
+### Changed
+- **Cải tiến Header:** 
+  - Hiển thị tên người dùng đang đăng nhập và nút Đăng xuất trực quan.
+  - **Phân quyền Menu:** Tự động ẩn mục "Danh mục Cơ quan" đối với những tài khoản không có quyền Admin.
+- **Giới hạn Dữ liệu theo Phạm vi (Data Scoping):**
+  - **Trang Quản lý Án & Tổng Quan:** Tự động lọc toàn bộ danh sách và thống kê theo `scope` của tài khoản (Ví dụ: Tài khoản Phú Quốc chỉ tiếp cận được các hồ sơ thuộc UBND/Chủ tịch UBND Đặc khu Phú Quốc).
+  - **Modal Thêm Án:** Giới hạn danh sách gợi ý "Người phải thi hành" đúng theo phạm vi được phân công của người dùng.
+- **Bảo mật Database:** Thiết lập các chính sách RLS (Row Level Security) trên bảng `user_profiles`.
+
+
 ## [1.4.1] - 2026-03-25
 
 ### Added

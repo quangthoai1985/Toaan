@@ -292,6 +292,8 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
     const [originalDanhSachQuyetDinhKetQua, setOriginalDanhSachQuyetDinhKetQua] = useState<QuyetDinhEntry[]>([])
     const [ketQuaKetThucText, setKetQuaKetThucText] = useState('')
     const [originalKetQuaKetThucText, setOriginalKetQuaKetThucText] = useState('')
+    const [phanLoaiKetQua, setPhanLoaiKetQua] = useState('')
+    const [originalPhanLoaiKetQua, setOriginalPhanLoaiKetQua] = useState('')
     const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
 
     const [timeline, setTimeline] = useState<TienDoEntry[]>([])
@@ -398,6 +400,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
 
             let parsedKQText = '';
             let parsedKQQD: QuyetDinhEntry[] = [];
+            let parsedPhanLoai = '';
             if (record.ket_qua_cuoi_cung) {
                 try {
                     const parsed = JSON.parse(record.ket_qua_cuoi_cung);
@@ -406,6 +409,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                     } else if (typeof parsed === 'object' && parsed !== null) {
                         parsedKQText = parsed.text || '';
                         parsedKQQD = parsed.quyet_dinh || [];
+                        parsedPhanLoai = record.phan_loai_ket_qua || parsed.phan_loai || '';
                     } else {
                         parsedKQText = record.ket_qua_cuoi_cung;
                     }
@@ -423,6 +427,8 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             }
             setKetQuaKetThucText(parsedKQText);
             setOriginalKetQuaKetThucText(parsedKQText);
+            setPhanLoaiKetQua(parsedPhanLoai);
+            setOriginalPhanLoaiKetQua(parsedPhanLoai);
             setDanhSachQuyetDinhKetQua(parsedKQQD);
             setOriginalDanhSachQuyetDinhKetQua(JSON.parse(JSON.stringify(parsedKQQD)));
         }
@@ -517,7 +523,8 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
         const qdBuocChanged = JSON.stringify(danhSachQuyetDinhBuoc) !== JSON.stringify(originalDanhSachQuyetDinhBuoc)
         const qdKQChanged = JSON.stringify(danhSachQuyetDinhKetQua) !== JSON.stringify(originalDanhSachQuyetDinhKetQua)
         const textKQChanged = ketQuaKetThucText !== originalKetQuaKetThucText
-        return formChanged || tlChanged || qdChanged || qdBuocChanged || qdKQChanged || textKQChanged
+        const phanLoaiChanged = phanLoaiKetQua !== originalPhanLoaiKetQua
+        return formChanged || tlChanged || qdChanged || qdBuocChanged || qdKQChanged || textKQChanged || phanLoaiChanged
     }
 
     const buildKetQuaPayload = () => {
@@ -548,6 +555,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             quyet_dinh_buoc_thi_hanh: JSON.stringify(danhSachQuyetDinhBuoc),
             ly_do_cho_theo_doi: form.ly_do_cho_theo_doi || null,
             ket_qua_cuoi_cung: buildKetQuaPayload(),
+            phan_loai_ket_qua: phanLoaiKetQua || null,
             tien_do_cap_nhat: timeline,
             status: isForceComplete || record.status === 'COMPLETED' ? 'COMPLETED' : record.status
         }
@@ -566,6 +574,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
         setOriginalDanhSachQuyetDinhBuoc(JSON.parse(JSON.stringify(danhSachQuyetDinhBuoc)))
         setOriginalDanhSachQuyetDinhKetQua(JSON.parse(JSON.stringify(danhSachQuyetDinhKetQua)))
         setOriginalKetQuaKetThucText(ketQuaKetThucText)
+        setOriginalPhanLoaiKetQua(phanLoaiKetQua)
         Object.assign(record, payload)
         if (onSuccess) onSuccess()
     }
@@ -582,6 +591,7 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
             quyet_dinh_buoc_thi_hanh: JSON.stringify(danhSachQuyetDinhBuoc),
             ly_do_cho_theo_doi: form.ly_do_cho_theo_doi || null,
             ket_qua_cuoi_cung: buildKetQuaPayload(),
+            phan_loai_ket_qua: phanLoaiKetQua || null,
             tien_do_cap_nhat: timeline,
             status,
         }
@@ -935,6 +945,35 @@ export default function DetailModal({ open, record, onClose, onSuccess }: Props)
                                     emptyColor={record.status === 'COMPLETED' ? 'text-emerald-400' : 'text-slate-400'}
                                     emptyLabel="Nhập text Đã xong hoặc chi tiết..."
                                 />
+
+                                {/* 9.3 Phân loại kết quả */}
+                                <div>
+                                    <label className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block mb-3">Phân loại án</label>
+                                    <div className="flex flex-wrap gap-3">
+                                        <button
+                                            onClick={() => setPhanLoaiKetQua(prev => prev === 'Viện Kiểm Sát tối cao (Kết luận 83)' ? '' : 'Viện Kiểm Sát tối cao (Kết luận 83)')}
+                                            className={cn(
+                                                "px-4 py-2 rounded-xl text-sm font-medium border transition-all",
+                                                phanLoaiKetQua === 'Viện Kiểm Sát tối cao (Kết luận 83)'
+                                                    ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                                                    : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50"
+                                            )}
+                                        >
+                                            Viện Kiểm Sát tối cao (Kết luận 83)
+                                        </button>
+                                        <button
+                                            onClick={() => setPhanLoaiKetQua(prev => prev === 'Kiểm tra liên ngành Bộ' ? '' : 'Kiểm tra liên ngành Bộ')}
+                                            className={cn(
+                                                "px-4 py-2 rounded-xl text-sm font-medium border transition-all",
+                                                phanLoaiKetQua === 'Kiểm tra liên ngành Bộ'
+                                                    ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                                                    : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50"
+                                            )}
+                                        >
+                                            Kiểm tra liên ngành Bộ
+                                        </button>
+                                    </div>
+                                </div>
 
                                 {record.status === 'COMPLETED' && (
                                     <div className="flex justify-end mt-4">

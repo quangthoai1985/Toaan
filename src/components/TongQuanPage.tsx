@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Scale, CheckCircle2, Clock, PauseCircle, TrendingUp, Loader2, BarChart3, Building2 } from 'lucide-react'
+import { useAuth } from './AuthProvider'
 import {
     Chart as ChartJS,
     ArcElement,
@@ -28,6 +29,7 @@ interface StatsData {
 
 export default function TongQuanPage() {
     const supabase = createClient()
+    const { scope, profile } = useAuth()
     const [stats, setStats] = useState<StatsData>({
         total: 0,
         pending: 0,
@@ -41,35 +43,44 @@ export default function TongQuanPage() {
     const fetchStats = useCallback(async () => {
         setLoading(true)
 
+        // Helper: add scope filter
+        const scopedQuery = (q: any) => {
+            if (scope && scope.length > 0) return q.in('nguoi_phai_thi_hanh', scope)
+            return q
+        }
+
         // Fetch tổng số và đã thi hành
         const [totalRes, completedRes] = await Promise.all([
-            supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }),
-            supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED'),
+            scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })),
+            scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED')),
         ])
 
         // "Chờ theo dõi" = PENDING + có nội dung ở cột ly_do_cho_theo_doi
         // "Đang thi hành" = PENDING + ly_do_cho_theo_doi rỗng/null
         const [watchingRes, pendingRes] = await Promise.all([
-            supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
-                .eq('status', 'PENDING')
-                .not('ly_do_cho_theo_doi', 'is', null)
-                .neq('ly_do_cho_theo_doi', ''),
-            supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
-                .eq('status', 'PENDING')
-                .or('ly_do_cho_theo_doi.is.null,ly_do_cho_theo_doi.eq.'),
+            scopedQuery(
+                supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
+                    .eq('status', 'PENDING')
+                    .not('ly_do_cho_theo_doi', 'is', null)
+                    .neq('ly_do_cho_theo_doi', '')
+            ),
+            scopedQuery(
+                supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
+                    .eq('status', 'PENDING')
+                    .or('ly_do_cho_theo_doi.is.null,ly_do_cho_theo_doi.eq.')
+            ),
         ])
 
         // Fetch all records for grouping by organ
-        const { data: allRecords } = await supabase
-            .from('an_hanh_chinh')
-            .select('nguoi_phai_thi_hanh, status')
+        let allQuery = supabase.from('an_hanh_chinh').select('nguoi_phai_thi_hanh, status')
+        if (scope && scope.length > 0) allQuery = allQuery.in('nguoi_phai_thi_hanh', scope)
+        const { data: allRecords } = await allQuery
 
         // Group by nguoi_phai_thi_hanh
         const organMap: Record<string, number> = {}
         if (allRecords) {
             for (const r of allRecords) {
                 const name = (r.nguoi_phai_thi_hanh || 'Không xác định').replace(/\r?\n/g, ' ').trim()
-                // Normalize: extract core organ name
                 const coreName = normalizeOrganName(name)
                 organMap[coreName] = (organMap[coreName] || 0) + 1
             }
@@ -98,7 +109,7 @@ export default function TongQuanPage() {
         })
 
         setLoading(false)
-    }, [])
+    }, [scope])
 
     useEffect(() => {
         fetchStats()

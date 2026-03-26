@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from './Toast'
+import { useAuth } from './AuthProvider'
 import DateInput from './DateInput'
 
 interface Props {
@@ -24,6 +25,7 @@ function todayISO(): string {
 export default function AddAnModal({ open, onClose, onSuccess }: Props) {
     const supabase = createClient()
     const toast = useToast()
+    const { scope } = useAuth()
 
     const [form, setForm] = useState({
         nguoi_khoi_kien: '',
@@ -120,7 +122,7 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
             return
         }
 
-        const exactMatch = dmCoQuan.find(c => c.ten_co_quan.toLowerCase() === form.nguoi_phai_thi_hanh.trim().toLowerCase())
+        const exactMatch = coQuanList.find(c => c.ten_co_quan.toLowerCase() === form.nguoi_phai_thi_hanh.trim().toLowerCase())
         if (!exactMatch) {
             toast.error('Vui lòng chọn Người phải thi hành từ danh sách xổ xuống!')
             return
@@ -162,11 +164,15 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
         onClose()
     }
 
-    const filteredCq = dmCoQuan.filter(o => o.ten_co_quan.toLowerCase().includes(searchCq.toLowerCase()))
+    // Filter by scope if user has restricted access
+    const coQuanList = scope && scope.length > 0
+        ? dmCoQuan.filter(c => scope.some(s => c.ten_co_quan.toLowerCase().includes(s.toLowerCase())))
+        : dmCoQuan
+    const filteredCq = coQuanList.filter(o => o.ten_co_quan.toLowerCase().includes(searchCq.toLowerCase()))
     
     // Check if current input exactly matches any option
     const isInvalidCq = form.nguoi_phai_thi_hanh.trim().length > 0 
-        && !dmCoQuan.some(c => c.ten_co_quan.toLowerCase() === form.nguoi_phai_thi_hanh.trim().toLowerCase())
+        && !coQuanList.some(c => c.ten_co_quan.toLowerCase() === form.nguoi_phai_thi_hanh.trim().toLowerCase())
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
