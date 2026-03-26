@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { X, UploadCloud, Loader2, AlertCircle, FileSpreadsheet, CheckCircle2, FileDown, Eye, ChevronDown } from 'lucide-react'
 import { useToast } from './Toast'
+import { useAuth } from './AuthProvider'
 import * as xlsx from 'xlsx'
 import { cn, parseQuyetDinhList, parseQTTienDo, mapDVHC } from '@/lib/utils'
 import { AnHanhChinh, TienDoEntry } from '@/lib/types'
@@ -17,6 +18,7 @@ interface Props {
 export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
     const supabase = createClient()
     const toast = useToast()
+    const { profile } = useAuth()
     const fileInputRef = useRef<HTMLInputElement>(null)
     const workbookRef = useRef<xlsx.WorkBook | null>(null)
     
@@ -103,6 +105,7 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
                     status: importStatus,
                     ket_qua_cuoi_cung: ketQua,
                     tien_do_cap_nhat: tienDoList,
+                    created_by: profile?.id || undefined,
                 })
             }
 
@@ -111,7 +114,7 @@ export default function ImportExcelModal({ open, onClose, onSuccess }: Props) {
         } catch(e) {
             console.error(e)
         }
-    }, [selectedSheet, importStatus])
+    }, [selectedSheet, importStatus, profile?.id])
 
     async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]

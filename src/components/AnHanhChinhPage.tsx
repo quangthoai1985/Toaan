@@ -58,7 +58,7 @@ export default function AnHanhChinhPage() {
         setLoading(true)
         let query = supabase
             .from('an_hanh_chinh')
-            .select('*', { count: 'exact' })
+            .select('*, creator:user_profiles(id, display_name, role)', { count: 'exact' })
             .eq('status', activeTab)
             .order('updated_at', { ascending: false })
 
@@ -416,7 +416,17 @@ export default function AnHanhChinhPage() {
                                         />
                                     </td>
                                     <td className="px-5 py-3.5 text-slate-400 text-center font-mono text-xs font-medium">{idx + 1}</td>
-                                    <td className="px-5 py-3.5 text-slate-800 font-semibold">
+                                    <td className="px-5 py-3.5 text-slate-800 font-semibold align-top relative">
+                                        {row.creator?.role === 'user' && (
+                                            <div className="mb-2">
+                                                <span 
+                                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded shadow-sm text-[10px] font-bold bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200/60" 
+                                                    title={`Tạo bởi: ${row.creator.display_name || 'Tài khoản địa phương'}`}
+                                                >
+                                                    <span className="text-[10px]">📌</span> ĐỊA PHƯƠNG
+                                                </span>
+                                            </div>
+                                        )}
                                         {row.nguoi_khoi_kien
                                             ? row.nguoi_khoi_kien
                                                 .split(/\r?\n/)

@@ -19,6 +19,8 @@ export interface AnHanhChinh {
     tien_do_cap_nhat: TienDoEntry[]
     created_at: string
     updated_at: string
+    created_by?: string
+    creator?: { role: string; display_name: string }
 }
 
 export interface TienDoEntry {

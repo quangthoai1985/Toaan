@@ -23,6 +23,8 @@ interface StatsData {
     pending: number
     watching: number
     completed: number
+    localCreated: number
+    localCreators: { name: string; count: number }[]
     byOrgan: { name: string; count: number }[]
     byStatus: { status: string; count: number }[]
 }
@@ -35,6 +37,8 @@ export default function TongQuanPage() {
         pending: 0,
         watching: 0,
         completed: 0,
+        localCreated: 0,
+        localCreators: [],
         byOrgan: [],
         byStatus: [],
     })
@@ -72,17 +76,27 @@ export default function TongQuanPage() {
         ])
 
         // Fetch all records for grouping by organ
-        let allQuery = supabase.from('an_hanh_chinh').select('nguoi_phai_thi_hanh, status')
+        let allQuery = supabase.from('an_hanh_chinh').select('nguoi_phai_thi_hanh, status, creator:user_profiles(role, display_name)')
         if (scope && scope.length > 0) allQuery = allQuery.in('nguoi_phai_thi_hanh', scope)
         const { data: allRecords } = await allQuery
 
-        // Group by nguoi_phai_thi_hanh
+        // Group by nguoi_phai_thi_hanh and local creator
         const organMap: Record<string, number> = {}
+        const localCreatorMap: Record<string, number> = {}
+        let localCreatedCount = 0;
+        
         if (allRecords) {
             for (const r of allRecords) {
                 const name = (r.nguoi_phai_thi_hanh || 'Không xác định').replace(/\r?\n/g, ' ').trim()
                 const coreName = normalizeOrganName(name)
                 organMap[coreName] = (organMap[coreName] || 0) + 1
+                
+                const typedRecord = r as any;
+                if (typedRecord.creator?.role === 'user') {
+                    localCreatedCount++;
+                    const creatorName = typedRecord.creator?.display_name || 'Tài khoản chưa định danh';
+                    localCreatorMap[creatorName] = (localCreatorMap[creatorName] || 0) + 1;
+                }
             }
         }
 
@@ -90,6 +104,10 @@ export default function TongQuanPage() {
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 8)
+
+        const localCreators = Object.entries(localCreatorMap)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
 
         const pendingCount = pendingRes.count ?? 0
         const watchingCount = watchingRes.count ?? 0
@@ -100,6 +118,8 @@ export default function TongQuanPage() {
             pending: pendingCount,
             watching: watchingCount,
             completed: completedCount,
+            localCreated: localCreatedCount,
+            localCreators,
             byOrgan,
             byStatus: [
                 { status: 'Đang thi hành', count: pendingCount },
@@ -136,53 +156,40 @@ export default function TongQuanPage() {
             label: 'TỔNG SỐ ÁN',
             value: stats.total,
             icon: Scale,
-            gradient: 'from-blue-500 via-blue-600 to-indigo-700',
-            borderColor: 'border-l-blue-500',
-            bgLight: 'bg-blue-50',
-            textColor: 'text-blue-700',
-            iconBg: 'bg-blue-500/10',
-            iconColor: 'text-blue-500',
-            shadowColor: 'shadow-blue-500/20',
-            sub: null,
+            headerBg: 'bg-blue-600',
+            iconColor: 'text-blue-600',
+            valueColor: 'text-blue-600',
+            sub2: null
         },
         {
-            label: 'SỐ ÁN ĐÃ THI HÀNH',
+            label: 'ĐÃ THI HÀNH XONG',
             value: stats.completed,
             icon: CheckCircle2,
-            gradient: 'from-emerald-500 via-emerald-600 to-teal-700',
-            borderColor: 'border-l-emerald-500',
-            bgLight: 'bg-emerald-50',
-            textColor: 'text-emerald-700',
-            iconBg: 'bg-emerald-500/10',
-            iconColor: 'text-emerald-500',
-            shadowColor: 'shadow-emerald-500/20',
-            sub: `${completionRate}% hoàn thành`,
+            headerBg: 'bg-emerald-600',
+            iconColor: 'text-emerald-600',
+            valueColor: 'text-emerald-600',
+            sub: `${stats.completed}/${stats.total} hồ sơ`,
+            sub2: null
         },
         {
-            label: 'SỐ ÁN ĐANG THI HÀNH',
+            label: 'ĐANG THI HÀNH',
             value: stats.pending,
             icon: Clock,
-            gradient: 'from-orange-500 via-orange-600 to-red-600',
-            borderColor: 'border-l-orange-500',
-            bgLight: 'bg-orange-50',
-            textColor: 'text-orange-700',
-            iconBg: 'bg-orange-500/10',
-            iconColor: 'text-orange-500',
-            shadowColor: 'shadow-orange-500/20',
-            sub: stats.total > 0 ? `${Math.round((stats.pending / stats.total) * 100)}% tổng số` : null,
+            headerBg: 'bg-orange-600',
+            iconColor: 'text-orange-600',
+            valueColor: 'text-orange-600',
+            sub: `Chiếm ${stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}% tổng số`,
+            sub2: null
         },
         {
-            label: 'SỐ ÁN CHỜ THEO DÕI',
-            value: stats.watching,
-            icon: PauseCircle,
-            gradient: 'from-purple-500 via-purple-600 to-violet-700',
-            borderColor: 'border-l-purple-500',
-            bgLight: 'bg-purple-50',
-            textColor: 'text-purple-700',
-            iconBg: 'bg-purple-500/10',
-            iconColor: 'text-purple-500',
-            shadowColor: 'shadow-purple-500/20',
-            sub: stats.total > 0 ? `${Math.round((stats.watching / stats.total) * 100)}% tổng số` : null,
+            label: 'TIẾN ĐỘ HOÀN THÀNH',
+            value: `${completionRate}%`,
+            icon: TrendingUp,
+            headerBg: 'bg-purple-600',
+            iconColor: 'text-purple-600',
+            valueColor: 'text-purple-600',
+            sub: `${stats.completed}/${stats.total} hồ sơ đã hoàn thành`,
+            sub2: null
         },
     ]
 
@@ -392,44 +399,44 @@ export default function TongQuanPage() {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {kpiCards.map((card) => {
                     const Icon = card.icon
                     return (
                         <div
                             key={card.label}
-                            className={`relative overflow-hidden bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-lg ${card.shadowColor} transition-all duration-300 hover:-translate-y-0.5 group`}
+                            className="relative bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 flex flex-col hover:shadow-lg transition-all duration-300 group min-h-[220px]"
                         >
-                            {/* Gradient top border */}
-                            <div className={`h-1.5 bg-gradient-to-r ${card.gradient}`} />
-                            
-                            <div className="p-5">
-                                {/* Header */}
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                                        {card.label}
-                                    </span>
-                                    <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                                        <Icon className={`w-5 h-5 ${card.iconColor}`} />
-                                    </div>
-                                </div>
-
-                                {/* Value */}
-                                <div className={`text-4xl font-extrabold ${card.textColor} tracking-tight tabular-nums`}>
-                                    {card.value.toLocaleString('vi-VN')}
-                                </div>
-
-                                {/* Sub info */}
-                                {card.sub && (
-                                    <p className="text-xs text-slate-400 font-medium mt-2 flex items-center gap-1.5">
-                                        <TrendingUp className="w-3.5 h-3.5" />
-                                        {card.sub}
-                                    </p>
-                                )}
+                            {/* Header Strip */}
+                            <div className={`h-12 flex items-center px-5 ${card.headerBg}`}>
+                                <span className="text-white text-[13px] font-bold uppercase tracking-wider">{card.label}</span>
                             </div>
 
-                            {/* Decorative gradient circle */}
-                            <div className={`absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-gradient-to-br ${card.gradient} opacity-[0.04] group-hover:opacity-[0.08] transition-opacity`} />
+                            {/* Floating Icon Container */}
+                            <div className="absolute right-4 top-12 -translate-y-1/2 z-10">
+                                <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-md ring-4 ring-white transition-transform group-hover:scale-110">
+                                    <Icon className={`w-5 h-5 ${card.iconColor}`} />
+                                </div>
+                            </div>
+
+                            {/* Body Content */}
+                            <div className="p-6 pt-8 flex-1 flex flex-col">
+                                <div className={`text-[52px] font-black ${card.valueColor} tracking-tight leading-none mb-3`}>
+                                    {card.value}
+                                </div>
+
+                                {/* Sub Breakdown */}
+                                <div className="mt-auto pt-4 border-t border-slate-50 flex flex-col gap-0.5">
+                                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">
+                                        {card.sub}
+                                    </span>
+                                    {card.sub2 && (
+                                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">
+                                            {card.sub2}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     )
                 })}
@@ -458,31 +465,75 @@ export default function TongQuanPage() {
                 </div>
             </div>
 
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            {/* Charts & Local Sources Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 {/* Doughnut Chart */}
-                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-                    <div className="px-5 py-4 border-b border-slate-100">
+                <div className="col-span-1 lg:col-span-4 bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col">
+                    <div className="px-5 py-4 border-b border-slate-100 shrink-0">
                         <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-purple-500" />
                             Phân Bố Trạng Thái
                         </h3>
                     </div>
-                    <div className="p-5 h-[320px] flex items-center justify-center">
+                    <div className="p-5 flex-1 min-h-[320px] max-h-[350px] flex items-center justify-center">
                         <Doughnut data={doughnutData} options={doughnutOptions} />
                     </div>
                 </div>
 
                 {/* Status Comparison Bar Chart */}
-                <div className="lg:col-span-3 bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-                    <div className="px-5 py-4 border-b border-slate-100">
+                <div className="col-span-1 lg:col-span-4 bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col">
+                    <div className="px-5 py-4 border-b border-slate-100 shrink-0">
                         <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" />
                             So Sánh Trạng Thái Án
                         </h3>
                     </div>
-                    <div className="p-5 h-[320px]">
+                    <div className="p-5 flex-1 min-h-[320px] max-h-[350px]">
                         <Bar data={statusBarData} options={statusBarOptions} />
+                    </div>
+                </div>
+
+                {/* Local Creators Table */}
+                <div className="col-span-1 lg:col-span-4 bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col">
+                    <div className="px-5 py-4 border-b border-slate-100 shrink-0 flex items-center justify-between">
+                        <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-amber-500" />
+                            Nguồn Án Mới
+                        </h3>
+                        <div className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200/60 rounded text-[10px] font-bold">
+                            TỔNG: {stats.localCreated}
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-auto bg-slate-50/30 max-h-[350px]">
+                        {stats.localCreators.length > 0 ? (
+                            <table className="w-full text-sm text-left border-collapse">
+                                <thead className="bg-slate-100/80 sticky top-0 z-10 backdrop-blur-sm shadow-sm">
+                                    <tr>
+                                        <th className="px-4 py-3 font-semibold text-slate-500 text-xs">CƠ QUAN / ĐỊA PHƯƠNG</th>
+                                        <th className="px-4 py-3 text-center font-semibold text-slate-500 text-xs">SỐ ÁN</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {stats.localCreators.map((c, i) => (
+                                        <tr key={i} className="hover:bg-slate-50/80 transition-colors group">
+                                            <td className="px-4 py-3 font-medium text-slate-700">{c.name}</td>
+                                            <td className="px-4 py-3 text-center">
+                                                <span className="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold text-xs group-hover:bg-amber-100 group-hover:text-amber-700 transition-colors">
+                                                    {c.count}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center py-8 px-4 text-center">
+                                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                                    <Building2 className="w-5 h-5 text-slate-300" />
+                                </div>
+                                <span className="text-slate-500 text-sm font-medium">Chưa có bản án nào được khởi tạo<br/>bởi các tài khoản tuyến dưới.</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

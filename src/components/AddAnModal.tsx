@@ -5,8 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { QuyetDinhEntry, TienDoEntry } from '@/lib/types'
 import {
     X, FileText, User, Building2, Scale, AlertCircle, 
-    Plus, Trash2, Loader2, Save
+    Plus, Trash2, Loader2, Save, Clock
 } from 'lucide-react'
+import { parseQTTienDo } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import { useToast } from './Toast'
 import { useAuth } from './AuthProvider'
@@ -25,7 +26,7 @@ function todayISO(): string {
 export default function AddAnModal({ open, onClose, onSuccess }: Props) {
     const supabase = createClient()
     const toast = useToast()
-    const { scope } = useAuth()
+    const { scope, profile } = useAuth()
 
     const [form, setForm] = useState({
         nguoi_khoi_kien: '',
@@ -43,6 +44,7 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
     const [danhSachQuyetDinhBuoc, setDanhSachQuyetDinhBuoc] = useState<QuyetDinhEntry[]>([])
     
     const [loading, setLoading] = useState(false)
+    const [rawProgressText, setRawProgressText] = useState('')
     const [dmCoQuan, setDmCoQuan] = useState<{id: string, ten_co_quan: string, cap_co_quan: string}[]>([])
 
     const [searchCq, setSearchCq] = useState('')
@@ -66,6 +68,7 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
                 so_quyet_dinh: '', ngay_ban_hanh: '', co_quan_ban_hanh: ''
             }])
             setDanhSachQuyetDinhBuoc([])
+            setRawProgressText('')
             setSearchCq('')
         }
     }, [open])
@@ -143,12 +146,13 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
             nghia_vu_thi_hanh: form.nghia_vu_thi_hanh.trim() || null,
             quyet_dinh_buoc_thi_hanh: qdBuocJson,
             status: 'PENDING',
-            tien_do_cap_nhat: [{
+            tien_do_cap_nhat: rawProgressText.trim() ? parseQTTienDo(rawProgressText) : [{
                 id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
                 date: todayISO(),
                 content: 'Tiếp nhận bản án/quyết định mới'
             }] as TienDoEntry[],
-            ket_qua_cuoi_cung: null
+            ket_qua_cuoi_cung: null,
+            created_by: profile?.id || undefined
         }
 
         const { error } = await supabase.from('an_hanh_chinh').insert(payload)
@@ -178,7 +182,7 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
             
-            <div className="relative w-full max-w-5xl bg-slate-50 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative w-full max-w-[1200px] bg-slate-50 rounded-2xl shadow-2xl flex flex-col h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200 z-10">
                     <div className="flex items-center gap-3">
@@ -195,10 +199,13 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
                     </button>
                 </div>
 
-                {/* Body - Scrollable */}
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
-                    
-                    {/* Mục 2: Người khởi kiện */}
+                {/* Body - Split layout */}
+                <div className="flex-1 flex overflow-hidden">
+                    {/* LEFT COLUMN — Details Form */}
+                    <div className="w-[55%] flex flex-col border-r border-slate-200 overflow-y-auto bg-slate-50/50">
+                        <div className="p-6 md:p-8 space-y-6">
+                            
+                            {/* Mục 2: Người khởi kiện */}
                     <div className="bg-white rounded-xl border border-amber-100 p-5 space-y-3 shadow-sm">
                         <div className="flex items-center gap-2">
                             <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">2</span>
@@ -407,7 +414,47 @@ export default function AddAnModal({ open, onClose, onSuccess }: Props) {
                             <Plus className="w-4 h-4" /> THÊM QĐ BUỘC THI HÀNH ÁN
                         </button>
                     </div>
+                        </div>
+                    </div>
 
+                    {/* RIGHT COLUMN — Smart Text Input */}
+                    <div className="w-[45%] flex flex-col overflow-y-auto bg-white">
+                        <div className="p-6 md:p-8 space-y-5 flex flex-col h-full bg-slate-50/30">
+                            <div className="flex items-center justify-between shrink-0 mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm shrink-0">7</span>
+                                    <Clock className="w-5 h-5 text-slate-500" />
+                                    <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest">
+                                        Quá trình Thi Hành Án
+                                    </h3>
+                                </div>
+                            </div>
+                            
+                            <div className="flex-1 flex flex-col">
+                                <label className="text-[11px] font-bold text-blue-700 uppercase tracking-wider mb-2 block">Dán nội dung từ Excel/Văn bản hệ thống tự động nhận diện</label>
+                                <textarea
+                                    value={rawProgressText}
+                                    onChange={e => setRawProgressText(e.target.value)}
+                                    placeholder={`HD dán nhanh:
+- 01/01/2024: Ra quyết định thi hành án
+- 05/01/2024 Nội dung không có dấu hai chấm
+Ngày 10/01/2024: Tống đạt hợp lệ`}
+                                    className="w-full flex-1 bg-white text-slate-800 font-medium border border-blue-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-300 min-h-[250px] resize-none shadow-sm transition-all"
+                                />
+                                
+                                <div className="mt-4 bg-blue-50/50 border border-blue-100 rounded-xl p-4 text-xs text-slate-600 leading-relaxed space-y-2">
+                                    <p className="font-semibold text-blue-800">💡 Hướng dẫn định dạng (Hệ thống sẽ tự nhận diện thời gian):</p>
+                                    <ul className="list-disc pl-4 space-y-1.5 text-slate-600">
+                                        <li>Cú pháp: <span className="font-mono text-purple-700 bg-white px-1 py-0.5 rounded border border-purple-100">{'<Ngày tháng> <Dấu phân cách> <Nội dung>'}</span></li>
+                                        <li>Ngày có thể viết: <span className="font-medium">15/05/2023</span>, <span className="font-medium">15/5/2023</span>, hoặc có chữ: <span className="font-medium">Ngày 15/05/2023</span>.</li>
+                                        <li>Dấu phân cách hỗ trợ: dấu hai chấm <span className="font-bold">(:)</span>, dấu gạch ngang <span className="font-bold">(-)</span> hoặc <span className="font-bold underline">khoảng trắng</span>.</li>
+                                        <li>Nếu <span className="font-bold">có gạch đầu dòng</span> nhưng <span className="font-bold">không có ngày</span>: Hệ thống tạo mốc mới nhưng để trống ngày.</li>
+                                        <li>Nếu <span className="font-bold">không có cả gạch và ngày</span>: Hệ thống cộng dồn nội dung vào mốc sự kiện ngay phía trên.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Footer / Summary Action */}

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Scale, LayoutDashboard, Building2, BarChart3, LogOut, User } from 'lucide-react'
+import { Scale, LayoutDashboard, Building2, BarChart3, LogOut, User, Shield } from 'lucide-react'
 import { useAuth } from './AuthProvider'
 
 export default function Header() {
@@ -51,18 +51,32 @@ export default function Header() {
                         Quản lý Án
                     </Link>
                     {isAdmin && (
-                        <Link 
-                            href="/co-quan"
-                            className={cn(
-                                "flex items-center gap-2 px-4 h-full border-b-2 text-sm font-semibold transition-colors",
-                                pathname.startsWith('/co-quan')
-                                    ? "border-red-400 text-white bg-white/5" 
-                                    : "border-transparent text-red-100/60 hover:text-red-100 hover:bg-white/5"
-                            )}
-                        >
-                            <Building2 className="w-4 h-4" />
-                            Danh mục Cơ quan
-                        </Link>
+                        <>
+                            <Link 
+                                href="/co-quan"
+                                className={cn(
+                                    "flex items-center gap-2 px-4 h-full border-b-2 text-sm font-semibold transition-colors",
+                                    pathname.startsWith('/co-quan')
+                                        ? "border-red-400 text-white bg-white/5" 
+                                        : "border-transparent text-red-100/60 hover:text-red-100 hover:bg-white/5"
+                                )}
+                            >
+                                <Building2 className="w-4 h-4" />
+                                Danh mục Cơ quan
+                            </Link>
+                            <Link 
+                                href="/quan-ly-tai-khoan"
+                                className={cn(
+                                    "flex items-center gap-2 px-4 h-full border-b-2 text-sm font-semibold transition-colors",
+                                    pathname.startsWith('/quan-ly-tai-khoan')
+                                        ? "border-red-400 text-white bg-white/5" 
+                                        : "border-transparent text-red-100/60 hover:text-red-100 hover:bg-white/5"
+                                )}
+                            >
+                                <Shield className="w-4 h-4" />
+                                Quản lý Tài khoản
+                            </Link>
+                        </>
                     )}
                 </div>
 

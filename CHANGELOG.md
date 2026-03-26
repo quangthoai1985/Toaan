@@ -5,6 +5,19 @@ All notable changes to the **Quản Lý Án Hành Chính** project will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-03-27
+
+### Added
+- **Hệ thống Quản lý Tài khoản (Account Management):**
+  - Phát triển trang Quản lý tài khoản (`/quan-ly-tai-khoan`) cho phép Admin thực hiện các thao tác CRUD người dùng một cách trực quan.
+  - Tích hợp API Route bảo mật sử dụng `service_role_key` để quản trị an toàn danh sách người dùng trong Supabase Auth và Profile.
+  - **Dropdown Đơn vị Hành chính:** Tự động hóa việc chọn tên hiển thị từ danh sách 102 xã/phường/đặc khu (truy xuất từ dữ liệu chuẩn `DVHC.xlsx`).
+  - **Tự động hóa Phân quyền (Auto-Scoping):** Hệ thống tự động thiết lập phạm vi quản lý án (mặc định gồm UBND và Chủ tịch UBND địa phương) ngay khi tạo tài khoản, loại bỏ hoàn toàn các bước cấu hình thủ công.
+
+### Changed
+- **Tối ưu giao diện Modal:** Chuyển đổi toàn bộ logic Modal Thêm/Sửa tài khoản sang Tailwind CSS thuần, khắc phục lỗi tương phản màu sắc và xung đột React Context (Toast).
+- **Loại bỏ dữ liệu dư thừa:** Gỡ bỏ các truy vấn danh mục cơ quan không cần thiết tại trang quản lý tài khoản để tăng tốc độ phản hồi.
+
 ## [1.5.0] - 2026-03-26
 
 ### Added
