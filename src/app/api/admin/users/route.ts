@@ -2,11 +2,16 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
+export const dynamic = 'force-dynamic'
+
 // Hàm trợ giúp để tạo Supabase Admin Client
 function getAdminClient() {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        throw new Error('Missing Supabase Service Role Key or URL in Env')
+    }
     return createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY,
         {
             auth: {
                 autoRefreshToken: false,
@@ -21,7 +26,7 @@ async function requireAdmin() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) return null
+    if (!user) throw new Error('Cần đăng nhập để thực hiện')
 
     const { data: profile } = await supabase
         .from('user_profiles')
@@ -29,19 +34,19 @@ async function requireAdmin() {
         .eq('id', user.id)
         .single()
 
-    if (!profile || profile.role !== 'admin') return null
+    if (!profile || profile.role !== 'admin') throw new Error('Không có quyền quản trị (Not an admin)')
 
     return user
 }
 
 // Lấy danh sách tài khoản
 export async function GET() {
-    const adminUser = await requireAdmin()
-    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    const adminClient = getAdminClient()
-
     try {
+        const adminUser = await requireAdmin()
+        if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        
+        const adminClient = getAdminClient()
+
         // Lấy từ auth.users
         const { data: authData, error: authError } = await adminClient.auth.admin.listUsers()
         if (authError) throw authError
@@ -74,12 +79,12 @@ export async function GET() {
 
 // Tạo tài khoản mới
 export async function POST(request: Request) {
-    const adminUser = await requireAdmin()
-    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    const adminClient = getAdminClient()
-
     try {
+        const adminUser = await requireAdmin()
+        if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+        const adminClient = getAdminClient()
+
         const body = await request.json()
         const { email, password, display_name, role, scope } = body
 
@@ -124,12 +129,12 @@ export async function POST(request: Request) {
 
 // Cập nhật thông tin tài khoản
 export async function PUT(request: Request) {
-    const adminUser = await requireAdmin()
-    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    const adminClient = getAdminClient()
-
     try {
+        const adminUser = await requireAdmin()
+        if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+        const adminClient = getAdminClient()
+
         const body = await request.json()
         const { id, email, password, display_name, role, scope } = body
 
@@ -167,12 +172,12 @@ export async function PUT(request: Request) {
 
 // Xóa tài khoản
 export async function DELETE(request: Request) {
-    const adminUser = await requireAdmin()
-    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    const adminClient = getAdminClient()
-
     try {
+        const adminUser = await requireAdmin()
+        if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+        const adminClient = getAdminClient()
+
         const { searchParams } = new URL(request.url)
         const id = searchParams.get('id')
 
