@@ -1,17 +1,34 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 export const dynamic = 'force-dynamic'
 
+// Lấy biến môi trường theo cách tương thích cả Cloudflare Workers và LocalDev
+function getEnv(key: string): string | undefined {
+    // Thử lấy từ Cloudflare context trước (production)
+    try {
+        const ctx = getCloudflareContext()
+        const val = (ctx.env as Record<string, string | undefined>)[key]
+        if (val) return val
+    } catch {
+        // Không phải môi trường Cloudflare (local dev) - bỏ qua
+    }
+    // Fallback về process.env (local dev với .env.local)
+    return process.env[key]
+}
+
 // Hàm trợ giúp để tạo Supabase Admin Client
 function getAdminClient() {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        throw new Error('Missing Supabase Service Role Key or URL in Env')
+    const url = getEnv('NEXT_PUBLIC_SUPABASE_URL')
+    const serviceKey = getEnv('SUPABASE_SERVICE_ROLE_KEY')
+    if (!url || !serviceKey) {
+        throw new Error(`Missing env vars: URL=${!!url}, KEY=${!!serviceKey}`)
     }
     return createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY,
+        url,
+        serviceKey,
         {
             auth: {
                 autoRefreshToken: false,
