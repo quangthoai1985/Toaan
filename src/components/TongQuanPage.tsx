@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Scale, CheckCircle2, Clock, PauseCircle, TrendingUp, Loader2, BarChart3, Building2 } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Scale, CheckCircle2, Clock, TrendingUp, Loader2, BarChart3, Building2 } from 'lucide-react'
 import { useAuth } from './AuthProvider'
 import {
     Chart as ChartJS,
@@ -30,8 +29,7 @@ interface StatsData {
 }
 
 export default function TongQuanPage() {
-    const supabase = createClient()
-    const { scope, profile, loading: authLoading } = useAuth()
+    const { user, loading: authLoading } = useAuth()
     const [stats, setStats] = useState<StatsData>({
         total: 0,
         pending: 0,
@@ -43,121 +41,69 @@ export default function TongQuanPage() {
         byStatus: [],
     })
     const [loading, setLoading] = useState(true)
+    const [slowLoad, setSlowLoad] = useState(false)
 
     const fetchStats = useCallback(async () => {
-        // Nếu Auth chưa lấy được thông tin đăng nhập, không chạy fetch thống kê
-        if (authLoading) return;
+        if (authLoading) return
+
+        if (!user) {
+            setLoading(false)
+            return
+        }
 
         setLoading(true)
+        setSlowLoad(false)
 
         try {
-            // Chờ 500ms để AuthProvider có thời gian đóng Auth Lock hoàn toàn trước khi bắn API
-            await new Promise(resolve => setTimeout(resolve, 500))
+            const controller = new AbortController()
+            const timeout = setTimeout(() => controller.abort(), 15000)
 
-            // Helper: add scope filter
-            const scopedQuery = (q: any) => {
-                if (scope && scope.length > 0) return q.in('nguoi_phai_thi_hanh', scope)
-                return q
-            }
-
-            // Fetch TUẦN TỰ để tránh lỗi Steal Web Locks API của Supabase trên Cloudflare
-            const totalRes = await scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }))
-            const completedRes = await scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED'))
-            
-            // "Chờ theo dõi" = PENDING + có nội dung ở cột ly_do_cho_theo_doi
-            const watchingRes = await scopedQuery(
-                supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
-                    .eq('status', 'PENDING')
-                    .not('ly_do_cho_theo_doi', 'is', null)
-                    .neq('ly_do_cho_theo_doi', '')
-            )
-
-            // "Đang thi hành" = PENDING + ly_do_cho_theo_doi rỗng/null
-            const pendingRes = await scopedQuery(
-                supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
-                    .eq('status', 'PENDING')
-                    .or('ly_do_cho_theo_doi.is.null,ly_do_cho_theo_doi.eq.')
-            )
-
-            // Fetch all records for grouping by organ
-            let allQuery = supabase.from('an_hanh_chinh').select('nguoi_phai_thi_hanh, status, creator:user_profiles(role, display_name)')
-            if (scope && scope.length > 0) allQuery = allQuery.in('nguoi_phai_thi_hanh', scope)
-            const { data: allRecords } = await allQuery
-
-            // Group by nguoi_phai_thi_hanh and local creator
-            const organMap: Record<string, number> = {}
-            const localCreatorMap: Record<string, number> = {}
-            let localCreatedCount = 0;
-            
-            if (allRecords) {
-                for (const r of allRecords) {
-                    const name = (r.nguoi_phai_thi_hanh || 'Không xác định').replace(/\r?\n/g, ' ').trim()
-                    const coreName = normalizeOrganName(name)
-                    organMap[coreName] = (organMap[coreName] || 0) + 1
-                    
-                    const typedRecord = r as any;
-                    if (typedRecord.creator?.role === 'user') {
-                        localCreatedCount++;
-                        const creatorName = typedRecord.creator?.display_name || 'Tài khoản chưa định danh';
-                        localCreatorMap[creatorName] = (localCreatorMap[creatorName] || 0) + 1;
-                    }
-                }
-            }
-
-            const byOrgan = Object.entries(organMap)
-                .map(([name, count]) => ({ name, count }))
-                .sort((a, b) => b.count - a.count)
-                .slice(0, 8)
-
-            const localCreators = Object.entries(localCreatorMap)
-                .map(([name, count]) => ({ name, count }))
-                .sort((a, b) => b.count - a.count)
-
-            const pendingCount = pendingRes.count ?? 0
-            const watchingCount = watchingRes.count ?? 0
-            const completedCount = completedRes.count ?? 0
-
-            setStats({
-                total: totalRes.count ?? 0,
-                pending: pendingCount,
-                watching: watchingCount,
-                completed: completedCount,
-                localCreated: localCreatedCount,
-                localCreators,
-                byOrgan,
-                byStatus: [
-                    { status: 'Đang thi hành', count: pendingCount },
-                    { status: 'Chờ theo dõi', count: watchingCount },
-                    { status: 'Đã thi hành', count: completedCount },
-                ],
+            const response = await fetch('/api/dashboard/stats', {
+                method: 'GET',
+                credentials: 'same-origin',
+                cache: 'no-store',
+                signal: controller.signal,
+                headers: {
+                    'Cache-Control': 'no-store',
+                },
             })
-        } catch (error: any) {
-            console.error("Lỗi khi fetch thống kê:", error)
+
+            clearTimeout(timeout)
+
+            const payload = await response.json() as StatsData & { error?: string }
+
+            if (!response.ok) {
+                throw new Error(payload.error || `Không thể tải thống kê (${response.status})`)
+            }
+
+            if (payload.error) {
+                throw new Error(payload.error)
+            }
+
+            setStats(payload)
+        } catch (error) {
+            console.error('Lỗi khi fetch thống kê:', error)
         } finally {
             setLoading(false)
         }
-    }, [scope, authLoading])
+    }, [authLoading, user])
 
     useEffect(() => {
-        fetchStats()
+        void fetchStats()
     }, [fetchStats])
 
-    // Normalize organ names to group similar entries
-    function normalizeOrganName(name: string): string {
-        const lower = name.toLowerCase()
-        if (lower.includes('ubnd') && lower.includes('tỉnh kiên giang')) return 'UBND Tỉnh Kiên Giang'
-        if (lower.includes('phú quốc') && (lower.includes('chủ tịch') || lower.includes('ct'))) return 'Chủ tịch UBND Phú Quốc'
-        if (lower.includes('phú quốc')) return 'UBND Phú Quốc'
-        if (lower.includes('rạch giá')) return 'UBND TP. Rạch Giá'
-        if (lower.includes('châu thành')) return 'UBND H. Châu Thành'
-        if (lower.includes('an giang')) return 'UBND Tỉnh An Giang'
-        if (lower.includes('long xuyên')) return 'UBND TP. Long Xuyên'
-        return name.length > 35 ? name.substring(0, 35) + '...' : name
-    }
+    // Nếu loading quá 5s, hiện nút thử lại
+    useEffect(() => {
+        if (!loading) {
+            setSlowLoad(false)
+            return
+        }
+        const timer = setTimeout(() => setSlowLoad(true), 5000)
+        return () => clearTimeout(timer)
+    }, [loading])
 
     const completionRate = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0
 
-    // KPI Cards config
     const kpiCards = [
         {
             label: 'TỔNG SỐ ÁN',
@@ -166,7 +112,7 @@ export default function TongQuanPage() {
             headerBg: 'bg-blue-600',
             iconColor: 'text-blue-600',
             valueColor: 'text-blue-600',
-            sub2: null
+            sub2: null,
         },
         {
             label: 'ĐÃ THI HÀNH XONG',
@@ -176,7 +122,7 @@ export default function TongQuanPage() {
             iconColor: 'text-emerald-600',
             valueColor: 'text-emerald-600',
             sub: `${stats.completed}/${stats.total} hồ sơ`,
-            sub2: null
+            sub2: null,
         },
         {
             label: 'ĐANG THI HÀNH',
@@ -186,7 +132,7 @@ export default function TongQuanPage() {
             iconColor: 'text-orange-600',
             valueColor: 'text-orange-600',
             sub: `Chiếm ${stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}% tổng số`,
-            sub2: null
+            sub2: null,
         },
         {
             label: 'TIẾN ĐỘ HOÀN THÀNH',
@@ -196,11 +142,10 @@ export default function TongQuanPage() {
             iconColor: 'text-purple-600',
             valueColor: 'text-purple-600',
             sub: `${stats.completed}/${stats.total} hồ sơ đã hoàn thành`,
-            sub2: null
+            sub2: null,
         },
     ]
 
-    // Doughnut Chart Data
     const doughnutData = {
         labels: ['Đang thi hành', 'Đã thi hành', 'Chờ theo dõi'],
         datasets: [
@@ -253,7 +198,6 @@ export default function TongQuanPage() {
         },
     }
 
-    // Bar Chart - By Organ
     const barData = {
         labels: stats.byOrgan.map((o) => o.name),
         datasets: [
@@ -310,7 +254,6 @@ export default function TongQuanPage() {
         },
     }
 
-    // Progress bar chart (vertical bar for status comparison)
     const statusBarData = {
         labels: ['Đang thi hành', 'Đã thi hành', 'Chờ theo dõi'],
         datasets: [
@@ -380,13 +323,20 @@ export default function TongQuanPage() {
             <div className="flex flex-col items-center justify-center flex-1 h-full min-h-[400px]">
                 <Loader2 className="w-10 h-10 animate-spin text-red-600 mb-4" />
                 <span className="text-slate-500 text-sm font-medium">Đang tải dữ liệu thống kê...</span>
+                {slowLoad && (
+                    <button
+                        onClick={() => { window.location.reload() }}
+                        className="mt-4 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                        Tải lại trang
+                    </button>
+                )}
             </div>
         )
     }
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 flex flex-col flex-1 min-h-0 w-full h-full gap-6 overflow-auto">
-            {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
@@ -405,7 +355,6 @@ export default function TongQuanPage() {
                 </div>
             </div>
 
-            {/* KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {kpiCards.map((card) => {
                     const Icon = card.icon
@@ -414,25 +363,21 @@ export default function TongQuanPage() {
                             key={card.label}
                             className="relative bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 flex flex-col hover:shadow-lg transition-all duration-300 group min-h-[220px]"
                         >
-                            {/* Header Strip */}
                             <div className={`h-12 flex items-center px-5 ${card.headerBg}`}>
                                 <span className="text-white text-[13px] font-bold uppercase tracking-wider">{card.label}</span>
                             </div>
 
-                            {/* Floating Icon Container */}
                             <div className="absolute right-4 top-12 -translate-y-1/2 z-10">
                                 <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-md ring-4 ring-white transition-transform group-hover:scale-110">
                                     <Icon className={`w-5 h-5 ${card.iconColor}`} />
                                 </div>
                             </div>
 
-                            {/* Body Content */}
                             <div className="p-6 pt-8 flex-1 flex flex-col">
                                 <div className={`text-[52px] font-black ${card.valueColor} tracking-tight leading-none mb-3`}>
                                     {card.value}
                                 </div>
 
-                                {/* Sub Breakdown */}
                                 <div className="mt-auto pt-4 border-t border-slate-50 flex flex-col gap-0.5">
                                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">
                                         {card.sub}
@@ -449,7 +394,6 @@ export default function TongQuanPage() {
                 })}
             </div>
 
-            {/* Progress Bar - Tiến độ hoàn thành */}
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5">
                 <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
@@ -472,9 +416,7 @@ export default function TongQuanPage() {
                 </div>
             </div>
 
-            {/* Charts & Local Sources Row */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                {/* Doughnut Chart */}
                 <div className="col-span-1 lg:col-span-4 bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div className="px-5 py-4 border-b border-slate-100 shrink-0">
                         <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
@@ -487,7 +429,6 @@ export default function TongQuanPage() {
                     </div>
                 </div>
 
-                {/* Status Comparison Bar Chart */}
                 <div className="col-span-1 lg:col-span-4 bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div className="px-5 py-4 border-b border-slate-100 shrink-0">
                         <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
@@ -500,7 +441,6 @@ export default function TongQuanPage() {
                     </div>
                 </div>
 
-                {/* Local Creators Table */}
                 <div className="col-span-1 lg:col-span-4 bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div className="px-5 py-4 border-b border-slate-100 shrink-0 flex items-center justify-between">
                         <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
@@ -538,14 +478,13 @@ export default function TongQuanPage() {
                                 <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3">
                                     <Building2 className="w-5 h-5 text-slate-300" />
                                 </div>
-                                <span className="text-slate-500 text-sm font-medium">Chưa có bản án nào được khởi tạo<br/>bởi các tài khoản tuyến dưới.</span>
+                                <span className="text-slate-500 text-sm font-medium">Chưa có bản án nào được khởi tạo<br />bởi các tài khoản tuyến dưới.</span>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Horizontal Bar - By Organ */}
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-slate-100">
                     <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
@@ -559,9 +498,7 @@ export default function TongQuanPage() {
                 </div>
             </div>
 
-            {/* Summary Cards Row */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-2">
-                {/* Card 1 - Breakdown */}
                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white shadow-lg">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Chi Tiết Trạng Thái</h4>
                     <div className="space-y-3">
@@ -589,7 +526,6 @@ export default function TongQuanPage() {
                     </div>
                 </div>
 
-                {/* Card 2 - Completion */}
                 <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white shadow-lg shadow-emerald-500/20">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-emerald-100/70 mb-3">Tỷ Lệ Hoàn Thành</h4>
                     <div className="text-5xl font-extrabold tabular-nums">{completionRate}%</div>
@@ -604,7 +540,6 @@ export default function TongQuanPage() {
                     </div>
                 </div>
 
-                {/* Card 3 - Pending Alert */}
                 <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-5 text-white shadow-lg shadow-orange-500/20">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-orange-100/70 mb-3">Cần Xử Lý</h4>
                     <div className="text-5xl font-extrabold tabular-nums">{stats.pending + stats.watching}</div>

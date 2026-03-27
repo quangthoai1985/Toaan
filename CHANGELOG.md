@@ -5,6 +5,22 @@ All notable changes to the **Quản Lý Án Hành Chính** project will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-03-27
+
+### Fixed
+- **Auth Refresh Deadlock (Bypass Web Locks):**
+  - Khắc phục triệt để lỗi "kẹt loading" vĩnh viễn khi refresh trang do xung đột Web Locks API trong Supabase JS SDK.
+  - Triển khai custom `lock` function trong `createBrowserClient` để thực thi các tác vụ xác thực mà không bị kẹt bởi các lock cũ (orphaned locks) từ React StrictMode hoặc quá trình tải lại trang.
+- **Tính ổn định của Session:**
+  - Giải quyết lỗi `AbortError` và `Lock broken` khi khởi tạo ứng dụng, đảm bảo `getUser()` luôn trả về kết quả ngay lập tức dưới 1 giây.
+
+### Changed
+- **Kiến trúc Quản lý Session (Approach 3):**
+  - Chuyển đổi cơ chế lấy thông tin người dùng từ gọi trực tiếp SDK sang sử dụng API Route nội bộ (`/api/auth/session`).
+  - **Server-side Session:** API Route đọc session trực tiếp từ Secure Cookies ở phía máy chủ, loại bỏ hoàn toàn sự phụ thuộc vào Web Locks của trình duyệt khi khởi tạo ứng dụng.
+  - **AuthProvider Refactoring:** Tối ưu hóa `AuthProvider` để ưu tiên lấy dữ liệu từ API session, giúp giao diện người dùng (Header, Admin Menu) hiển thị đúng vai trò (`admin`/`user`) ngay sau khi refresh.
+- **Tối ưu hóa Supabase Client:** Cấu hình `isSingleton: false` cho client-side để đảm bảo các thay đổi cấu hình xác thực luôn được áp dụng mới nhất, tránh cache module cũ.
+
 ## [1.6.0] - 2026-03-27
 
 ### Added
