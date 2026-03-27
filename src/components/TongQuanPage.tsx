@@ -31,7 +31,7 @@ interface StatsData {
 
 export default function TongQuanPage() {
     const supabase = createClient()
-    const { scope, profile } = useAuth()
+    const { scope, profile, loading: authLoading } = useAuth()
     const [stats, setStats] = useState<StatsData>({
         total: 0,
         pending: 0,
@@ -45,6 +45,9 @@ export default function TongQuanPage() {
     const [loading, setLoading] = useState(true)
 
     const fetchStats = useCallback(async () => {
+        // Nếu Auth chưa lấy được thông tin đăng nhập, không chạy fetch thống kê
+        if (authLoading) return;
+
         setLoading(true)
 
         try {
@@ -133,7 +136,7 @@ export default function TongQuanPage() {
         } finally {
             setLoading(false)
         }
-    }, [scope])
+    }, [scope, authLoading])
 
     useEffect(() => {
         fetchStats()
