@@ -27,7 +27,7 @@ interface StatusAction {
 }
 
 export default function AnHanhChinhPage() {
-    const supabase = createClient()
+    const [supabase] = useState(() => createClient())
     const toast = useToast()
     const { scope, isAdmin } = useAuth()
     const [activeTab, setActiveTab] = useState<TabKey>('PENDING')

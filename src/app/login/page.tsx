@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Scale, Loader2, LogIn, Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
-    const supabase = createClient()
+    const [supabase] = useState(() => createClient())
     const router = useRouter()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')

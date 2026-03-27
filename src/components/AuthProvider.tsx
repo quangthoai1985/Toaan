@@ -35,7 +35,8 @@ export function useAuth() {
 }
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-    const supabase = createClient()
+    // Tránh việc Client bị khởi tạo lại liên tục khi React Re-render (lỗi kẹt Auth)
+    const [supabase] = useState(() => createClient())
     const [user, setUser] = useState<User | null>(null)
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [loading, setLoading] = useState(true)
@@ -58,6 +59,11 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase])
 
     useEffect(() => {
+        // Fallback chống treo vĩnh viễn (Force Unlock UI sau 5 giây)
+        const timer = setTimeout(() => {
+            setLoading(false)
+        }, 5000)
+
         // Get initial session
         supabase.auth.getUser().then(async ({ data: { user }, error }) => {
             if (error) console.error("Lỗi auth get user:", error.message)
@@ -85,7 +91,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
             }
         )
 
-        return () => subscription.unsubscribe()
+        return () => {
+            subscription.unsubscribe()
+            clearTimeout(timer)
+        }
     }, [supabase, fetchProfile])
 
     const signOut = async () => {
