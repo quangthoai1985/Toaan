@@ -51,33 +51,33 @@ export default function TongQuanPage() {
         setLoading(true)
 
         try {
+            // Chờ 500ms để AuthProvider có thời gian đóng Auth Lock hoàn toàn trước khi bắn API
+            await new Promise(resolve => setTimeout(resolve, 500))
+
             // Helper: add scope filter
             const scopedQuery = (q: any) => {
                 if (scope && scope.length > 0) return q.in('nguoi_phai_thi_hanh', scope)
                 return q
             }
 
-            // Fetch tổng số và đã thi hành
-            const [totalRes, completedRes] = await Promise.all([
-                scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })),
-                scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED')),
-            ])
-
+            // Fetch TUẦN TỰ để tránh lỗi Steal Web Locks API của Supabase trên Cloudflare
+            const totalRes = await scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }))
+            const completedRes = await scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED'))
+            
             // "Chờ theo dõi" = PENDING + có nội dung ở cột ly_do_cho_theo_doi
+            const watchingRes = await scopedQuery(
+                supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
+                    .eq('status', 'PENDING')
+                    .not('ly_do_cho_theo_doi', 'is', null)
+                    .neq('ly_do_cho_theo_doi', '')
+            )
+
             // "Đang thi hành" = PENDING + ly_do_cho_theo_doi rỗng/null
-            const [watchingRes, pendingRes] = await Promise.all([
-                scopedQuery(
-                    supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
-                        .eq('status', 'PENDING')
-                        .not('ly_do_cho_theo_doi', 'is', null)
-                        .neq('ly_do_cho_theo_doi', '')
-                ),
-                scopedQuery(
-                    supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
-                        .eq('status', 'PENDING')
-                        .or('ly_do_cho_theo_doi.is.null,ly_do_cho_theo_doi.eq.')
-                ),
-            ])
+            const pendingRes = await scopedQuery(
+                supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
+                    .eq('status', 'PENDING')
+                    .or('ly_do_cho_theo_doi.is.null,ly_do_cho_theo_doi.eq.')
+            )
 
             // Fetch all records for grouping by organ
             let allQuery = supabase.from('an_hanh_chinh').select('nguoi_phai_thi_hanh, status, creator:user_profiles(role, display_name)')

@@ -57,6 +57,9 @@ export default function AnHanhChinhPage() {
     const fetchData = useCallback(async () => {
         setLoading(true)
         try {
+            // Delay 500ms nhường Lock cho AuthProvider chạy xong
+            await new Promise(resolve => setTimeout(resolve, 500))
+
             let query = supabase
                 .from('an_hanh_chinh')
                 .select('*, creator:user_profiles(id, display_name, role)', { count: 'exact' })
@@ -86,11 +89,12 @@ export default function AnHanhChinhPage() {
                 if (scope && scope.length > 0) q = q.in('nguoi_phai_thi_hanh', scope)
                 return q
             }
-            const [pendingRes, watchingRes, completedRes] = await Promise.all([
-                buildCountQuery('PENDING'),
-                buildCountQuery('WATCHING'),
-                buildCountQuery('COMPLETED'),
-            ])
+            
+            // FETCH TUẦN TỰ để tránh nghẽn Lock API
+            const pendingRes = await buildCountQuery('PENDING')
+            const watchingRes = await buildCountQuery('WATCHING')
+            const completedRes = await buildCountQuery('COMPLETED')
+            
             setPendingCount(pendingRes.count ?? 0)
             setWatchingCount(watchingRes.count ?? 0)
             setCompletedCount(completedRes.count ?? 0)
