@@ -41,19 +41,33 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     const fetchProfile = useCallback(async (userId: string) => {
-        const { data } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('id', userId)
-            .single()
-        if (data) setProfile(data as UserProfile)
+        try {
+            const { data, error } = await supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('id', userId)
+                .single()
+            if (error) {
+                console.error("Lỗi khi tải profile:", error.message)
+            } else if (data) {
+                setProfile(data as UserProfile)
+            }
+        } catch (err: any) {
+            console.error("Ngoại lệ tải profile:", err)
+        }
     }, [supabase])
 
     useEffect(() => {
         // Get initial session
-        supabase.auth.getUser().then(({ data: { user } }) => {
+        supabase.auth.getUser().then(async ({ data: { user }, error }) => {
+            if (error) console.error("Lỗi auth get user:", error.message)
             setUser(user ?? null)
-            if (user) fetchProfile(user.id)
+            if (user) {
+                await fetchProfile(user.id)
+            }
+            setLoading(false)
+        }).catch((err) => {
+            console.error("Ngoại lệ khi get user:", err)
             setLoading(false)
         })
 

@@ -47,88 +47,92 @@ export default function TongQuanPage() {
     const fetchStats = useCallback(async () => {
         setLoading(true)
 
-        // Helper: add scope filter
-        const scopedQuery = (q: any) => {
-            if (scope && scope.length > 0) return q.in('nguoi_phai_thi_hanh', scope)
-            return q
-        }
+        try {
+            // Helper: add scope filter
+            const scopedQuery = (q: any) => {
+                if (scope && scope.length > 0) return q.in('nguoi_phai_thi_hanh', scope)
+                return q
+            }
 
-        // Fetch tổng số và đã thi hành
-        const [totalRes, completedRes] = await Promise.all([
-            scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })),
-            scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED')),
-        ])
+            // Fetch tổng số và đã thi hành
+            const [totalRes, completedRes] = await Promise.all([
+                scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })),
+                scopedQuery(supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED')),
+            ])
 
-        // "Chờ theo dõi" = PENDING + có nội dung ở cột ly_do_cho_theo_doi
-        // "Đang thi hành" = PENDING + ly_do_cho_theo_doi rỗng/null
-        const [watchingRes, pendingRes] = await Promise.all([
-            scopedQuery(
-                supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
-                    .eq('status', 'PENDING')
-                    .not('ly_do_cho_theo_doi', 'is', null)
-                    .neq('ly_do_cho_theo_doi', '')
-            ),
-            scopedQuery(
-                supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
-                    .eq('status', 'PENDING')
-                    .or('ly_do_cho_theo_doi.is.null,ly_do_cho_theo_doi.eq.')
-            ),
-        ])
+            // "Chờ theo dõi" = PENDING + có nội dung ở cột ly_do_cho_theo_doi
+            // "Đang thi hành" = PENDING + ly_do_cho_theo_doi rỗng/null
+            const [watchingRes, pendingRes] = await Promise.all([
+                scopedQuery(
+                    supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
+                        .eq('status', 'PENDING')
+                        .not('ly_do_cho_theo_doi', 'is', null)
+                        .neq('ly_do_cho_theo_doi', '')
+                ),
+                scopedQuery(
+                    supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true })
+                        .eq('status', 'PENDING')
+                        .or('ly_do_cho_theo_doi.is.null,ly_do_cho_theo_doi.eq.')
+                ),
+            ])
 
-        // Fetch all records for grouping by organ
-        let allQuery = supabase.from('an_hanh_chinh').select('nguoi_phai_thi_hanh, status, creator:user_profiles(role, display_name)')
-        if (scope && scope.length > 0) allQuery = allQuery.in('nguoi_phai_thi_hanh', scope)
-        const { data: allRecords } = await allQuery
+            // Fetch all records for grouping by organ
+            let allQuery = supabase.from('an_hanh_chinh').select('nguoi_phai_thi_hanh, status, creator:user_profiles(role, display_name)')
+            if (scope && scope.length > 0) allQuery = allQuery.in('nguoi_phai_thi_hanh', scope)
+            const { data: allRecords } = await allQuery
 
-        // Group by nguoi_phai_thi_hanh and local creator
-        const organMap: Record<string, number> = {}
-        const localCreatorMap: Record<string, number> = {}
-        let localCreatedCount = 0;
-        
-        if (allRecords) {
-            for (const r of allRecords) {
-                const name = (r.nguoi_phai_thi_hanh || 'Không xác định').replace(/\r?\n/g, ' ').trim()
-                const coreName = normalizeOrganName(name)
-                organMap[coreName] = (organMap[coreName] || 0) + 1
-                
-                const typedRecord = r as any;
-                if (typedRecord.creator?.role === 'user') {
-                    localCreatedCount++;
-                    const creatorName = typedRecord.creator?.display_name || 'Tài khoản chưa định danh';
-                    localCreatorMap[creatorName] = (localCreatorMap[creatorName] || 0) + 1;
+            // Group by nguoi_phai_thi_hanh and local creator
+            const organMap: Record<string, number> = {}
+            const localCreatorMap: Record<string, number> = {}
+            let localCreatedCount = 0;
+            
+            if (allRecords) {
+                for (const r of allRecords) {
+                    const name = (r.nguoi_phai_thi_hanh || 'Không xác định').replace(/\r?\n/g, ' ').trim()
+                    const coreName = normalizeOrganName(name)
+                    organMap[coreName] = (organMap[coreName] || 0) + 1
+                    
+                    const typedRecord = r as any;
+                    if (typedRecord.creator?.role === 'user') {
+                        localCreatedCount++;
+                        const creatorName = typedRecord.creator?.display_name || 'Tài khoản chưa định danh';
+                        localCreatorMap[creatorName] = (localCreatorMap[creatorName] || 0) + 1;
+                    }
                 }
             }
+
+            const byOrgan = Object.entries(organMap)
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 8)
+
+            const localCreators = Object.entries(localCreatorMap)
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count)
+
+            const pendingCount = pendingRes.count ?? 0
+            const watchingCount = watchingRes.count ?? 0
+            const completedCount = completedRes.count ?? 0
+
+            setStats({
+                total: totalRes.count ?? 0,
+                pending: pendingCount,
+                watching: watchingCount,
+                completed: completedCount,
+                localCreated: localCreatedCount,
+                localCreators,
+                byOrgan,
+                byStatus: [
+                    { status: 'Đang thi hành', count: pendingCount },
+                    { status: 'Chờ theo dõi', count: watchingCount },
+                    { status: 'Đã thi hành', count: completedCount },
+                ],
+            })
+        } catch (error: any) {
+            console.error("Lỗi khi fetch thống kê:", error)
+        } finally {
+            setLoading(false)
         }
-
-        const byOrgan = Object.entries(organMap)
-            .map(([name, count]) => ({ name, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 8)
-
-        const localCreators = Object.entries(localCreatorMap)
-            .map(([name, count]) => ({ name, count }))
-            .sort((a, b) => b.count - a.count)
-
-        const pendingCount = pendingRes.count ?? 0
-        const watchingCount = watchingRes.count ?? 0
-        const completedCount = completedRes.count ?? 0
-
-        setStats({
-            total: totalRes.count ?? 0,
-            pending: pendingCount,
-            watching: watchingCount,
-            completed: completedCount,
-            localCreated: localCreatedCount,
-            localCreators,
-            byOrgan,
-            byStatus: [
-                { status: 'Đang thi hành', count: pendingCount },
-                { status: 'Chờ theo dõi', count: watchingCount },
-                { status: 'Đã thi hành', count: completedCount },
-            ],
-        })
-
-        setLoading(false)
     }, [scope])
 
     useEffect(() => {
