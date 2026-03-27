@@ -41,6 +41,12 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
+    // Chống cache cho tất cả trang cần xác thực
+    // Ngăn Cloudflare CDN và trình duyệt cache trang cũ
+    supabaseResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0')
+    supabaseResponse.headers.set('CDN-Cache-Control', 'no-store')
+    supabaseResponse.headers.set('Cloudflare-CDN-Cache-Control', 'no-store')
+
     return supabaseResponse
 }
 
