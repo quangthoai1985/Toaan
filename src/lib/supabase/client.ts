@@ -25,7 +25,7 @@ export function createClient() {
                 // Nguyên nhân deadlock: React StrictMode unmount/remount
                 // → orphaned Web Lock → mọi auth call kẹt 5s → AbortError
                 // Custom lock = chỉ thực thi function, không acquire lock
-                lock: async (_name: string, _timeout: number, fn: () => Promise<unknown>) => {
+                lock: async <R>(_name: string, _timeout: number, fn: () => Promise<R>): Promise<R> => {
                     return await fn()
                 },
             },
