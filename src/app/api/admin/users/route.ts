@@ -125,6 +125,7 @@ export async function POST(request: Request) {
             .from('user_profiles')
             .insert({
                 id: newId,
+                email,
                 display_name,
                 role: role || 'user',
                 scope: scope || []
