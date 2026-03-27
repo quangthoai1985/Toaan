@@ -30,8 +30,7 @@ interface StatsData {
 }
 
 export default function TongQuanPage() {
-    // Tránh bị khởi tạo lại mỗi lần Render Component
-    const [supabase] = useState(() => createClient())
+    const supabase = createClient()
     const { scope, profile, loading: authLoading } = useAuth()
     const [stats, setStats] = useState<StatsData>({
         total: 0,

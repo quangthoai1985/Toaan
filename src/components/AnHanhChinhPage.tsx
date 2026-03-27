@@ -27,7 +27,7 @@ interface StatusAction {
 }
 
 export default function AnHanhChinhPage() {
-    const [supabase] = useState(() => createClient())
+    const supabase = createClient()
     const toast = useToast()
     const { scope, isAdmin } = useAuth()
     const [activeTab, setActiveTab] = useState<TabKey>('PENDING')
@@ -56,45 +56,49 @@ export default function AnHanhChinhPage() {
     // Fetch data
     const fetchData = useCallback(async () => {
         setLoading(true)
-        let query = supabase
-            .from('an_hanh_chinh')
-            .select('*, creator:user_profiles(id, display_name, role)', { count: 'exact' })
-            .eq('status', activeTab)
-            .order('updated_at', { ascending: false })
+        try {
+            let query = supabase
+                .from('an_hanh_chinh')
+                .select('*, creator:user_profiles(id, display_name, role)', { count: 'exact' })
+                .eq('status', activeTab)
+                .order('updated_at', { ascending: false })
 
-        // Filter by scope if user has restricted access
-        if (scope && scope.length > 0) {
-            query = query.in('nguoi_phai_thi_hanh', scope)
+            // Filter by scope if user has restricted access
+            if (scope && scope.length > 0) {
+                query = query.in('nguoi_phai_thi_hanh', scope)
+            }
+
+            if (search.trim()) {
+                const s = `%${search.trim()}%`
+                query = query.or(`so_ban_an.ilike.${s},nguoi_khoi_kien.ilike.${s}`)
+            }
+
+            const { data: rows, error } = await query
+
+            if (!error && rows) {
+                setData(rows as AnHanhChinh[])
+                setSelectedIds([])
+            }
+
+            // Fetch counts for all tabs (also scoped)
+            const buildCountQuery = (status: string) => {
+                let q = supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', status)
+                if (scope && scope.length > 0) q = q.in('nguoi_phai_thi_hanh', scope)
+                return q
+            }
+            const [pendingRes, watchingRes, completedRes] = await Promise.all([
+                buildCountQuery('PENDING'),
+                buildCountQuery('WATCHING'),
+                buildCountQuery('COMPLETED'),
+            ])
+            setPendingCount(pendingRes.count ?? 0)
+            setWatchingCount(watchingRes.count ?? 0)
+            setCompletedCount(completedRes.count ?? 0)
+        } catch (err: any) {
+            console.error("Lỗi fetch dữ liệu án:", err)
+        } finally {
+            setLoading(false)
         }
-
-        if (search.trim()) {
-            const s = `%${search.trim()}%`
-            query = query.or(`so_ban_an.ilike.${s},nguoi_khoi_kien.ilike.${s}`)
-        }
-
-        const { data: rows, error } = await query
-
-        if (!error && rows) {
-            setData(rows as AnHanhChinh[])
-            setSelectedIds([])
-        }
-
-        // Fetch counts for all tabs (also scoped)
-        const buildCountQuery = (status: string) => {
-            let q = supabase.from('an_hanh_chinh').select('*', { count: 'exact', head: true }).eq('status', status)
-            if (scope && scope.length > 0) q = q.in('nguoi_phai_thi_hanh', scope)
-            return q
-        }
-        const [pendingRes, watchingRes, completedRes] = await Promise.all([
-            buildCountQuery('PENDING'),
-            buildCountQuery('WATCHING'),
-            buildCountQuery('COMPLETED'),
-        ])
-        setPendingCount(pendingRes.count ?? 0)
-        setWatchingCount(watchingRes.count ?? 0)
-        setCompletedCount(completedRes.count ?? 0)
-
-        setLoading(false)
     }, [activeTab, search, scope])
 
     useEffect(() => { fetchData() }, [fetchData])

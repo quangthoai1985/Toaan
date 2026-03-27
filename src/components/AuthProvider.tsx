@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
@@ -35,59 +35,50 @@ export function useAuth() {
 }
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-    // Tránh việc Client bị khởi tạo lại liên tục khi React Re-render (lỗi kẹt Auth)
-    const [supabase] = useState(() => createClient())
     const [user, setUser] = useState<User | null>(null)
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [loading, setLoading] = useState(true)
 
-    const fetchProfile = useCallback(async (userId: string) => {
-        try {
-            const { data, error } = await supabase
-                .from('user_profiles')
-                .select('*')
-                .eq('id', userId)
-                .single()
-            if (error) {
-                console.error("Lỗi khi tải profile:", error.message)
-            } else if (data) {
-                setProfile(data as UserProfile)
-            }
-        } catch (err: any) {
-            console.error("Ngoại lệ tải profile:", err)
-        }
-    }, [supabase])
-
     useEffect(() => {
-        // Fallback chống treo vĩnh viễn (Force Unlock UI sau 5 giây)
+        // Singleton client - luôn cùng 1 instance
+        const supabase = createClient()
+
+        // Fallback: Nếu sau 5 giây Auth vẫn chưa xong → buộc mở UI
         const timer = setTimeout(() => {
             setLoading(false)
         }, 5000)
 
-        // Get initial session
-        supabase.auth.getUser().then(async ({ data: { user }, error }) => {
-            if (error) console.error("Lỗi auth get user:", error.message)
-            setUser(user ?? null)
-            if (user) {
-                await fetchProfile(user.id)
-            }
-            setLoading(false)
-        }).catch((err) => {
-            console.error("Ngoại lệ khi get user:", err)
-            setLoading(false)
-        })
-
-        // Listen for auth changes
+        // CHỈ dùng onAuthStateChange - nó fire INITIAL_SESSION ngay lập tức
+        // KHÔNG gọi getUser() để tránh race condition
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (_event, session) => {
-                const currentUser = session?.user ?? null
-                setUser(currentUser)
-                if (currentUser) {
-                    await fetchProfile(currentUser.id)
-                } else {
-                    setProfile(null)
+            async (event: string, session: any) => {
+                try {
+                    const currentUser = session?.user ?? null
+                    setUser(currentUser)
+
+                    if (currentUser) {
+                        // Fetch profile từ DB
+                        const { data, error } = await supabase
+                            .from('user_profiles')
+                            .select('*')
+                            .eq('id', currentUser.id)
+                            .single()
+                        
+                        if (error) {
+                            console.error("Lỗi tải profile:", error.message)
+                            setProfile(null)
+                        } else if (data) {
+                            setProfile(data as UserProfile)
+                        }
+                    } else {
+                        setProfile(null)
+                    }
+                } catch (err) {
+                    console.error("Ngoại lệ Auth:", err)
+                } finally {
+                    setLoading(false)
+                    clearTimeout(timer)
                 }
-                setLoading(false)
             }
         )
 
@@ -95,9 +86,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
             subscription.unsubscribe()
             clearTimeout(timer)
         }
-    }, [supabase, fetchProfile])
+    }, []) // Empty deps: chạy DUY NHẤT 1 lần khi mount
 
     const signOut = async () => {
+        const supabase = createClient()
         await supabase.auth.signOut()
         setUser(null)
         setProfile(null)
