@@ -7,17 +7,7 @@ export function createClient() {
     if (client) return client
     client = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            auth: {
-                // TẮT Web Locks API - fix lỗi "Lock was not released within 5000ms"
-                // trên Cloudflare Workers SSR Hydration
-                lock: 'no-op' as any,
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true,
-            },
-        }
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
     return client
 }
